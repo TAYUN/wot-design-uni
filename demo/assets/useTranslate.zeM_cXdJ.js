@@ -1,0 +1,1 @@
+import{an as s,ao as a,ap as t,ad as n,B as r}from"./index-Ddr6X_C9.js";const e=e=>{const o=e?s(e)+".":"";return{translate:(s,...e)=>{const c=a.messages(),m=t(c,o+s);return n(m)?m(...e):r(m)?m:`${o}${s}`}}};export{e as u};

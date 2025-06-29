@@ -1,0 +1,139 @@
+# Wot UI
+
+> 高颜值、轻量化的uni-app组件库
+
+基于Vue3+TS开发，提供70+高质量组件，支持暗黑模式、国际化和自定义主题。
+
+## Table of Contents
+
+### 介绍
+
+
+### 快速上手
+
+
+### 定制主题
+
+
+### 国际化
+
+
+### 常见问题
+
+
+### 更新日志
+
+
+### ⭐ 案例
+
+
+### 加群沟通
+
+
+### 🥤一杯咖啡
+
+
+### 榜上有名
+
+
+### 基础
+
+- [Button 按钮](https://wot-design-uni.cn/component/button.md)
+- [Icon 图标 0.1.27 更新](https://wot-design-uni.cn/component/icon.md)
+- [Layout 布局](https://wot-design-uni.cn/component/layout.md)
+- [ConfigProvider 全局配置](https://wot-design-uni.cn/component/config-provider.md)
+- [Popup 弹出层](https://wot-design-uni.cn/component/popup.md)
+- [Resize 监听元素尺寸变化](https://wot-design-uni.cn/component/resize.md)
+- [Transition 动画](https://wot-design-uni.cn/component/transition.md)
+- [Fab 悬浮按钮](https://wot-design-uni.cn/component/fab.md)
+- [Text 文本](https://wot-design-uni.cn/component/text.md)
+
+### 导航
+
+- [Pagination 分页](https://wot-design-uni.cn/component/pagination.md)
+- [Popover 气泡](https://wot-design-uni.cn/component/popover.md)
+- [Tab 标签页](https://wot-design-uni.cn/component/tabs.md)
+- [Segmented 分段器 0.1.23](https://wot-design-uni.cn/component/segmented.md)
+- [Tabbar 标签栏](https://wot-design-uni.cn/component/tabbar.md)
+- [Navbar 导航栏](https://wot-design-uni.cn/component/navbar.md)
+- [Sidebar 侧边导航 0.1.49](https://wot-design-uni.cn/component/sidebar.md)
+- [Backtop 回到顶部](https://wot-design-uni.cn/component/backtop.md)
+- [IndexBar 索引栏 1.2.21](https://wot-design-uni.cn/component/index-bar.md)
+
+### 数据输入
+
+- [Calendar 日历选择器](https://wot-design-uni.cn/component/calendar.md)
+- [CalendarView 日历面板组件](https://wot-design-uni.cn/component/calendar-view.md)
+- [Checkbox 复选框](https://wot-design-uni.cn/component/checkbox.md)
+- [ColPicker 多列选择器](https://wot-design-uni.cn/component/col-picker.md)
+- [DatetimePicker 日期时间选择器](https://wot-design-uni.cn/component/datetime-picker.md)
+- [DatetimePickerView 日期时间选择器视图](https://wot-design-uni.cn/component/datetime-picker-view.md)
+- [Form 表单](https://wot-design-uni.cn/component/form.md)
+- [Input 输入框](https://wot-design-uni.cn/component/input.md)
+- [Textarea 文本域 0.2.0](https://wot-design-uni.cn/component/textarea.md)
+- [InputNumber 计数器](https://wot-design-uni.cn/component/input-number.md)
+- [Picker 选择器](https://wot-design-uni.cn/component/picker.md)
+- [PickerView 选择器视图](https://wot-design-uni.cn/component/picker-view.md)
+- [Radio 单选框](https://wot-design-uni.cn/component/radio.md)
+- [Rate 评分](https://wot-design-uni.cn/component/rate.md)
+- [Search 搜索框](https://wot-design-uni.cn/component/search.md)
+- [SelectPicker 单复选选择器 0.1.34 更新](https://wot-design-uni.cn/component/select-picker.md)
+- [Slider 滑块](https://wot-design-uni.cn/component/slider.md)
+- [Switch 开关](https://wot-design-uni.cn/component/switch.md)
+- [Upload 上传](https://wot-design-uni.cn/component/upload.md)
+- [PasswordInput 密码输入框 0.2.0](https://wot-design-uni.cn/component/password-input.md)
+- [Signature 签名 1.6.0](https://wot-design-uni.cn/component/signature.md)
+
+### 反馈
+
+- [ActionSheet 动作面板](https://wot-design-uni.cn/component/action-sheet.md)
+- [DropMenu 下拉菜单](https://wot-design-uni.cn/component/drop-menu.md)
+- [FloatingPanel 浮动面板](https://wot-design-uni.cn/component/floating-panel.md)
+- [Loading 加载指示器](https://wot-design-uni.cn/component/loading.md)
+- [MessageBox 弹框](https://wot-design-uni.cn/component/message-box.md)
+- [NoticeBar 通知栏](https://wot-design-uni.cn/component/notice-bar.md)
+- [Overlay 遮罩层 0.1.30](https://wot-design-uni.cn/component/overlay.md)
+- [Progress 进度条](https://wot-design-uni.cn/component/progress.md)
+- [Circle 环形进度条 0.1.19](https://wot-design-uni.cn/component/circle.md)
+- [SortButton 排序按钮](https://wot-design-uni.cn/component/sort-button.md)
+- [StatusTip 缺省提示](https://wot-design-uni.cn/component/status-tip.md)
+- [SwipeAction 滑动操作](https://wot-design-uni.cn/component/swipe-action.md)
+- [Toast 轻提示](https://wot-design-uni.cn/component/toast.md)
+- [Notify 消息通知](https://wot-design-uni.cn/component/notify.md)
+- [Tooltip 文字提示](https://wot-design-uni.cn/component/tooltip.md)
+- [CountDown 倒计时0.1.58](https://wot-design-uni.cn/component/count-down.md)
+- [CountTo 数字滚动1.3.8](https://wot-design-uni.cn/component/count-to.md)
+- [Keyboard 虚拟键盘 1.3.10](https://wot-design-uni.cn/component/keyboard.md)
+- [NumberKeyboard 数字键盘](https://wot-design-uni.cn/component/number-keyboard.md)
+
+### 数据展示
+
+- [Badge 徽标](https://wot-design-uni.cn/component/badge.md)
+- [Card 卡片](https://wot-design-uni.cn/component/card.md)
+- [Cell 单元格](https://wot-design-uni.cn/component/cell.md)
+- [Collapse 折叠面板](https://wot-design-uni.cn/component/collapse.md)
+- [Curtain 幕帘](https://wot-design-uni.cn/component/curtain.md)
+- [Divider 分割线](https://wot-design-uni.cn/component/divider.md)
+- [Gap 间隔槽](https://wot-design-uni.cn/component/gap.md)
+- [Img 图片](https://wot-design-uni.cn/component/img.md)
+- [ImgCropper 图片裁剪](https://wot-design-uni.cn/component/img-cropper.md)
+- [Grid 宫格](https://wot-design-uni.cn/component/grid.md)
+- [loadmore 加载更多](https://wot-design-uni.cn/component/loadmore.md)
+- [Skeleton 骨架屏](https://wot-design-uni.cn/component/skeleton.md)
+- [Steps 步骤条](https://wot-design-uni.cn/component/steps.md)
+- [Sticky 粘性布局](https://wot-design-uni.cn/component/sticky.md)
+- [Tag 标签](https://wot-design-uni.cn/component/tag.md)
+- [Watermark 水印 0.1.16](https://wot-design-uni.cn/component/watermark.md)
+- [Swiper 轮播](https://wot-design-uni.cn/component/swiper.md)
+- [Table 表格 0.1.39](https://wot-design-uni.cn/component/table.md)
+
+### 组合式API
+
+- [useUpload](https://wot-design-uni.cn/component/use-upload.md)
+- [useCountDown](https://wot-design-uni.cn/component/use-count-down.md)
+- [useToast](https://wot-design-uni.cn/component/use-toast.md)
+- [useMessage](https://wot-design-uni.cn/component/use-message.md)
+
+### Other
+
+- [useNotify](https://wot-design-uni.cn/component/use-notify.md)
