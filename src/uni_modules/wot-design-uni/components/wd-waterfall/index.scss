@@ -1,0 +1,18 @@
+/*
+ * @Author: weisheng
+ * @Date: 2025-01-20 00:00:00
+ * @LastEditTime: 2025-01-20 00:00:00
+ * @LastEditors: weisheng
+ * @Description: wd-waterfall 瀑布流组件样式
+ * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-waterfall/index.scss
+ * 记得注释
+ */
+
+@import '../common/abstracts/mixin';
+
+@include b(waterfall) {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}

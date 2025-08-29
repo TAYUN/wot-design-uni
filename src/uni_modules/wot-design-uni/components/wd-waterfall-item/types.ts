@@ -1,0 +1,167 @@
+/*
+ * @Author: weisheng
+ * @Date: 2025-01-20 00:00:00
+ * @LastEditTime: 2025-01-20 00:00:00
+ * @LastEditors: weisheng
+ * @Description: wd-waterfall-item 瀑布流项目组件类型定义
+ * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-waterfall-item/types.ts
+ * 记得注释
+ */
+
+import type { ExtractPropTypes } from 'vue'
+import { baseProps } from '../common/props'
+
+/**
+ * 错误处理模式
+ */
+export type ErrorHandlingMode = 'none' | 'placeholder' | 'retry' | 'fallback'
+
+/**
+ * 瀑布流项目组件属性
+ */
+export const waterfallItemProps = {
+  /**
+   * 项目索引
+   */
+  index: {
+    type: Number,
+    default: undefined
+  },
+  /**
+   * 固定宽度（可选）
+   */
+  width: {
+    type: Number,
+    default: undefined
+  },
+  /**
+   * 固定高度（可选）
+   */
+  height: {
+    type: Number,
+    default: undefined
+  },
+  /**
+   * 错误处理模式
+   */
+  errorHandlingMode: {
+    type: String as () => ErrorHandlingMode,
+    default: 'none'
+  },
+  /**
+   * 重试次数
+   */
+  retryCount: {
+    type: Number,
+    default: 2
+  },
+  /**
+   * 最大等待时间（毫秒）
+   */
+  maxWait: {
+    type: Number,
+    default: 3000
+  },
+  ...baseProps,
+
+}
+
+/**
+ * 瀑布流项目组件属性类型
+ */
+export type WaterfallItemProps = ExtractPropTypes<typeof waterfallItemProps>
+
+/**
+ * 瀑布流项目组件插槽
+ */
+export interface WaterfallItemSlots {
+  /**
+   * 默认插槽
+   * @param loaded 加载完成回调
+   * @param columnWidth 列宽度
+   * @param imageHeight 图片高度
+   * @param errorInfo 错误信息
+   */
+  default(props: {
+    loaded: (event?: any) => void
+    columnWidth: number
+    imageHeight: number
+    errorInfo: {
+      status:         
+        | 'none'
+        | 'fail'
+        | 'phok'
+        | 'timeout'
+        | 'final'
+      message: string
+      placeholder: {
+        load: () => void
+        error: () => void
+      }
+    }
+  }): any
+}
+
+/**
+ * 瀑布流项目组件事件
+ */
+export interface WaterfallItemEmits {
+  // 暂无事件
+}
+
+/**
+ * 瀑布流项目组件暴露的方法
+ */
+export interface WaterfallItemExpose {
+  // 暂无暴露方法
+}
+
+/**
+ * 瀑布流项目信息
+ */
+export interface WaterfallItemInfo {
+  /**
+   * 是否加载完成（图片等资源）
+   */
+  loaded: boolean
+  /**
+   * 是否加载成功
+   */
+  loadSuccess: boolean
+  /**
+   * 是否可见（由父组件控制）
+   */
+  visible: boolean
+  /**
+   * 是否插入项目
+   */
+  isInserted: boolean
+  /**
+   * 是否高度异常
+   */
+  heightError: boolean
+  /**
+   * 项目高度（DOM 实际高度）
+   */
+  height: number
+  /**
+   * 垂直位置（由父组件计算）
+   */
+  top: number
+  /**
+   * 水平位置（由父组件计算）
+   */
+  left: number
+  /**
+   * 项目索引
+   */
+  index?: number
+  /**
+   * 更新高度方法
+   */
+  updateHeight: (flag?: boolean) => Promise<void>
+  /**
+   * 重新加载图片方法
+   */
+  refreshImage: (isReset?: boolean) => Promise<void>
+}
