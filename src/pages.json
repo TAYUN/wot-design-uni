@@ -1027,6 +1027,126 @@
           }
         },
         {
+          "path": "waterfall/Index",
+          "name": "waterfall",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 瀑布",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/Columns",
+          "name": "waterfall-columns",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 列变化",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Columns"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/KnownSize",
+          "name": "waterfall-known",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 已知尺寸",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Known Size"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/Basic",
+          "name": "waterfall-basic",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 真实案例",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Basic"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/Delete",
+          "name": "waterfall-delete",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 删除项目",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Delete"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/ReflowDemo",
+          "name": "waterfall-refresh",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 刷新重排",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Refresh"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/MaxWait",
+          "name": "waterfall-maxwait",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 超时处理",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall MaxWait"
+            // #endif
+          }
+        },
+        {
+          "path": "waterfall/Dynamic",
+          "name": "waterfall-nodom",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 动态DOM",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall Dynamic"
+            // #endif
+          }
+        },
+        {
           "path": "sidebar/Index",
           "name": "sidebar",
           "style": {
