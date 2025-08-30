@@ -40,12 +40,14 @@ const emit = defineEmits<WaterfallEmits>()
 defineSlots<WaterfallSlots>()
 
 // const isActive = defineModel<boolean>() //语法较新
-const isShow = ref<boolean>(props?.show || true)
+const isShow = ref<boolean>(props?.show ?? true)
 // 容器是否活跃
 const isActive = computed(() => {
   if (props?.show !== undefined) {
+    console.log('外部内部状态 isShow', props?.show)
     return props?.show
   }
+  console.log('内部状态 isShow', isShow.value)
   return isShow.value
 })
 
@@ -369,13 +371,20 @@ function fullReflowAfterInsert() {
   const newContainerHeight = Math.max(...columns.map((col) => col.height), 0)
   containerHeight.value = newContainerHeight
 }
+/**
+ * 队列状态
+ */
+let queueProcessing = false
 
 /**
  * 处理排版队列
  * 从 pendingItems 队列中取出项目进行排版
  */
+
 async function processQueue() {
   try {
+    if (queueProcessing) return
+    queueProcessing = true
     updateLoadStatus()
     if (pendingItems.length === 0) return
 
@@ -439,6 +448,8 @@ async function processQueue() {
     isLayoutInterrupted.value = true
     console.error('error', error)
     // console.log('pendingItems', pendingItems)
+  } finally {
+    queueProcessing = false
   }
 }
 
