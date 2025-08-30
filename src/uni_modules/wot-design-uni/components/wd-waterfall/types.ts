@@ -8,10 +8,14 @@
  * 记得注释
  */
 
-import type { ExtractPropTypes, InjectionKey } from 'vue'
+import type { InjectionKey } from 'vue'
 import type { WaterfallItemInfo } from '../wd-waterfall-item/types'
 import { baseProps } from '../common/props'
 
+/**
+ * 错误处理模式
+ */
+export type ErrorMode = 'none' | 'placeholder' | 'retry' | 'fallback' | 'ignore'
 /**
  * 瀑布流组件属性
  */
@@ -44,13 +48,44 @@ export const waterfallProps = {
     type: Boolean,
     default: undefined
   },
-  ...baseProps,
+  /**
+   * 错误处理模式
+   */
+  errorMode: {
+    type: String as () => ErrorMode,
+    default: 'none'
+  },
+  /**
+   * 重试次数
+   */
+  retryCount: {
+    type: Number,
+    default: 2
+  },
+  /**
+   * 最大等待时间（毫秒）
+   */
+  maxWait: {
+    type: Number,
+    default: 3000
+  },
+  ...baseProps
 }
 
 /**
  * 瀑布流组件属性类型
  */
-export type WaterfallProps = ExtractPropTypes<typeof waterfallProps>
+export interface WaterfallProps {
+  columns?: number
+  columnGap?: number
+  rowGap?: number
+  show?: boolean
+  errorMode?: ErrorMode
+  retryCount?: number
+  maxWait?: number
+  customClass?: string
+  customStyle?: string
+}
 
 /**
  * 瀑布流组件默认属性
@@ -58,7 +93,9 @@ export type WaterfallProps = ExtractPropTypes<typeof waterfallProps>
 export const defaultWaterfallProps: Partial<WaterfallProps> = {
   columns: 2,
   columnGap: 8,
-  rowGap: 8
+  rowGap: 8,
+  errorMode: 'none',
+  retryCount: 1
 }
 
 /**
@@ -112,11 +149,11 @@ export interface WaterfallExpose {
  */
 export interface WaterfallContext {
   /**
-   * 添加项目
+   * 添加项目到瀑布流
    */
   addItem: (item: WaterfallItemInfo) => void
   /**
-   * 移除项目
+   * 从瀑布流中移除项目
    */
   removeItem: (item: WaterfallItemInfo) => void
   /**
@@ -135,6 +172,18 @@ export interface WaterfallContext {
    * 排版中断状态（响应式）
    */
   isLayoutInterrupted: boolean
+  /**
+   * 错误处理模式
+   */
+  errorMode: ErrorMode
+  /**
+   * 重试次数
+   */
+  retryCount: number
+  /**
+   * 最大等待时间（毫秒）
+   */
+  maxWait: number
 }
 
 /**

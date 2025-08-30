@@ -12,10 +12,9 @@ import type { ExtractPropTypes } from 'vue'
 import { baseProps } from '../common/props'
 
 /**
- * 错误处理模式
+ * 错误状态
  */
-export type ErrorHandlingMode = 'none' | 'placeholder' | 'retry' | 'fallback'
-
+export type Status = 'none' | 'fail' | 'phok' | 'timeout' | 'final'
 /**
  * 瀑布流项目组件属性
  */
@@ -41,35 +40,20 @@ export const waterfallItemProps = {
     type: Number,
     default: undefined
   },
-  /**
-   * 错误处理模式
-   */
-  errorHandlingMode: {
-    type: String as () => ErrorHandlingMode,
-    default: 'none'
-  },
-  /**
-   * 重试次数
-   */
-  retryCount: {
-    type: Number,
-    default: 2
-  },
-  /**
-   * 最大等待时间（毫秒）
-   */
-  maxWait: {
-    type: Number,
-    default: 3000
-  },
-  ...baseProps,
 
+  ...baseProps
 }
 
 /**
  * 瀑布流项目组件属性类型
  */
-export type WaterfallItemProps = ExtractPropTypes<typeof waterfallItemProps>
+export interface WaterfallItemProps {
+  index?: number
+  width?: number
+  height?: number
+  customClass?: string
+  customStyle?: string
+}
 
 /**
  * 瀑布流项目组件插槽
@@ -83,16 +67,12 @@ export interface WaterfallItemSlots {
    * @param errorInfo 错误信息
    */
   default(props: {
+    key: string
     loaded: (event?: any) => void
     columnWidth: number
     imageHeight: number
     errorInfo: {
-      status:         
-        | 'none'
-        | 'fail'
-        | 'phok'
-        | 'timeout'
-        | 'final'
+      status: Status
       message: string
       placeholder: {
         load: () => void

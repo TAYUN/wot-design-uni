@@ -1,12 +1,3 @@
-<!--
- * @Author: weisheng
- * @Date: 2025-01-20 00:00:00
- * @LastEditTime: 2025-01-20 00:00:00
- * @LastEditors: weisheng
- * @Description: wd-waterfall 瀑布流组件
- * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-waterfall/wd-waterfall.vue
- * 记得注释
--->
 <script setup lang="ts">
 /**
  * 瀑布流组件 - 主容器组件
@@ -17,23 +8,9 @@
  * 3. 监听项目加载状态，动态调整布局
  * 4. 提供上下文给子组件使用
  */
-import {
-  computed,
-  getCurrentInstance,
-  nextTick,
-  onMounted,
-  provide,
-  reactive,
-  ref,
-  watch,
-} from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, provide, reactive, ref, watch } from 'vue'
 import { onHide, onShow } from '@dcloudio/uni-app'
-import {
-  debounce,
-  getRect,
-  objToStyle,
-  uuid,
-} from '../common/util'
+import { debounce, getRect, uuid } from '../common/util'
 
 import {
   type WaterfallEmits,
@@ -41,18 +18,17 @@ import {
   type WaterfallProps,
   type WaterfallSlots,
   defaultWaterfallProps,
-  waterfallContextKey,
+  waterfallContextKey
 } from './types'
 import type { WaterfallItemInfo } from '../wd-waterfall-item/types'
-
 
 // 组件配置：启用虚拟主机和样式隔离
 defineOptions({
   name: 'wd-waterfall',
   options: {
     virtualHost: true,
-    styleIsolation: 'shared',
-  },
+    styleIsolation: 'shared'
+  }
 })
 
 // 组件属性定义
@@ -82,7 +58,7 @@ function setActive(value: boolean) {
 // ==================== 容器尺寸管理 ====================
 
 // 生成唯一的容器ID，用于DOM查询
-const containerId = uuid()
+const containerId = `wd-waterfall-${uuid()}`
 // 获取当前组件实例，用于DOM操作
 const instance = getCurrentInstance()
 
@@ -96,19 +72,15 @@ const containerHeight = ref(0)
  * 公式：(总宽度 - (列数-1) * 列间距) / 列数
  */
 const columnWidth = computed(() => {
-  return (
-    (containerWidth.value - (props.columns - 1) * props.columnGap)
-    / props.columns
-  )
+  return (containerWidth.value - (props.columns - 1) * props.columnGap) / props.columns
 })
 
 /**
  * 组件挂载后获取容器实际宽度
  */
 onMounted(async () => {
-  containerWidth.value = (
-    await getRect(`.${containerId}`, false, instance?.proxy)
-  ).width
+  const rect = await getRect(`.${containerId}`, false, instance?.proxy)
+  containerWidth.value = rect?.width || 0
   // 初始化列高度状态
   initColumns()
 })
@@ -147,8 +119,7 @@ function loadDone(handler: () => void) {
     if (loadStatus === 'idle') {
       // 如果当前是空闲状态，立即执行回调
       handler()
-    }
-    else {
+    } else {
       // 如果正在加载中，将回调加入队列
       if (!loadedHandlers.includes(handler)) {
         loadedHandlers.push(handler)
@@ -176,7 +147,7 @@ const pendingItems: WaterfallItemInfo[] = []
  * 直接维护每列的当前高度，避免重复计算
  * 使用 reactive 确保对象内部属性变化能触发响应式更新
  */
-const columns = reactive<{ colIndex: number, height: number }[]>([])
+const columns = reactive<{ colIndex: number; height: number }[]>([])
 
 /**
  * 更新加载状态
@@ -185,12 +156,11 @@ const columns = reactive<{ colIndex: number, height: number }[]>([])
 function updateLoadStatus() {
   if (pendingItems.length === 0) {
     // 执行所有等待的回调函数
-    loadedHandlers.forEach(handler => handler())
+    loadedHandlers.forEach((handler) => handler())
     loadedHandlers = []
     loadStatus = 'idle'
     emit('loadEnd') // 触发加载完成事件
-  }
-  else {
+  } else {
     loadStatus = 'busy'
     emit('loadStart') // 触发加载开始事件
   }
@@ -203,7 +173,7 @@ function initColumns() {
   columns.push(
     ...Array(props.columns)
       .fill(0)
-      .map((_, index) => ({ colIndex: index, height: 0 })),
+      .map((_, index) => ({ colIndex: index, height: 0 }))
   )
 }
 
@@ -238,8 +208,7 @@ function addItem(item: WaterfallItemInfo) {
   if (isInsertItem) {
     item.isInserted = true
     items.splice(item.index!, 0, item)
-  }
-  else {
+  } else {
     // 末尾追加项目
     item.isInserted = false
     items.push(item)
@@ -311,7 +280,7 @@ function recalculateItemsAfterRemoval() {
   }
 
   // 更新容器总高度
-  const newContainerHeight = Math.max(...columns.map(col => col.height), 0)
+  const newContainerHeight = Math.max(...columns.map((col) => col.height), 0)
   containerHeight.value = newContainerHeight
   // 触发重排完成事件
   updateLoadStatus()
@@ -336,8 +305,7 @@ const liveTasks = new Map<
 >()
 
 async function waitItemLoaded(item: WaterfallItemInfo) {
-  if (item.loaded)
-    return
+  if (item.loaded) return
 
   const key = item
   if (liveTasks.has(key)) {
@@ -359,7 +327,7 @@ async function waitItemLoaded(item: WaterfallItemInfo) {
           resolve()
         }
       },
-      { immediate: true },
+      { immediate: true }
     )
     liveTasks.set(key, { resolve, reject, stop })
   })
@@ -398,7 +366,7 @@ function fullReflowAfterInsert() {
   }
 
   // 更新容器总高度
-  const newContainerHeight = Math.max(...columns.map(col => col.height), 0)
+  const newContainerHeight = Math.max(...columns.map((col) => col.height), 0)
   containerHeight.value = newContainerHeight
 }
 
@@ -409,8 +377,7 @@ function fullReflowAfterInsert() {
 async function processQueue() {
   try {
     updateLoadStatus()
-    if (pendingItems.length === 0)
-      return
+    if (pendingItems.length === 0) return
 
     // 处理队列中的项目
     while (pendingItems.length > 0) {
@@ -432,15 +399,13 @@ async function processQueue() {
       if (item.isInserted) {
         // 6. 插入后进行全重排（类似删除后的处理）
         fullReflowAfterInsert()
-      }
-      else {
+      } else {
         // 正常追加项目的处理逻辑
         const currentMinColumn = getMinColumn()
 
         // 计算项目位置
         item.top = currentMinColumn.height + props.rowGap
-        item.left
-          = (props.columnGap + columnWidth.value) * currentMinColumn.colIndex
+        item.left = (props.columnGap + columnWidth.value) * currentMinColumn.colIndex
         const targetColumnIndex = currentMinColumn.colIndex
         const newHeight = item.top + item.height
         columns[targetColumnIndex].height = newHeight
@@ -450,7 +415,7 @@ async function processQueue() {
       item.visible = true
 
       // 从队列中移除已排版的项目
-      containerHeight.value = Math.max(...columns.map(col => col.height), 0)
+      containerHeight.value = Math.max(...columns.map((col) => col.height), 0)
       pendingItems.shift()
     }
 
@@ -470,8 +435,7 @@ async function processQueue() {
 
     // 更新加载状态
     updateLoadStatus()
-  }
-  catch (error) {
+  } catch (error) {
     isLayoutInterrupted.value = true
     console.error('error', error)
     // console.log('pendingItems', pendingItems)
@@ -573,8 +537,8 @@ watch(
     }
   },
   {
-    immediate: false,
-  },
+    immediate: false
+  }
 )
 
 onShow(() => {
@@ -604,7 +568,10 @@ provide(
     columnWidth, // 列宽度（响应式）
     isReflowing, // 全局重排状态（响应式）
     isLayoutInterrupted, // 排版中断状态（响应式）
-  }),
+    errorMode: props.errorMode, // 错误处理模式
+    retryCount: props.retryCount, // 重试次数
+    maxWait: props.maxWait // 最大等待时间
+  })
 )
 
 // ==================== 组件暴露接口 ====================
@@ -616,28 +583,15 @@ provide(
 defineExpose<WaterfallExpose>({
   reflow, // 完整重排（重置所有状态）
   refreshReflow, // 刷新重排（重置所有状态，包括数据）
-  loadDone, // 注册加载完成回调
+  loadDone // 注册加载完成回调
 })
 
 // ==================== 样式计算 ====================
-
-
-/**
- * 计算容器的内联样式
- * 主要是动态设置容器高度
- */
-const waterfallStyle = computed(() => {
-  return objToStyle(
-    {
-      height: `${containerHeight.value}px`, // 动态高度
-    },
-  )
-})
 </script>
 
 <template>
   <!-- 瀑布流容器：动态高度，包含所有瀑布流项目 -->
-  <view :class="`wd-waterfall ${containerId} ${customClass}`" :style="[customStyle, waterfallStyle]">
+  <view :class="`wd-waterfall ${containerId} ${customClass}`" :style="[customStyle, { height: containerHeight + 'px' }]">
     <slot />
   </view>
 </template>
