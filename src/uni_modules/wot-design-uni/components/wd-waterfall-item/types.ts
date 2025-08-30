@@ -1,14 +1,3 @@
-/*
- * @Author: weisheng
- * @Date: 2025-01-20 00:00:00
- * @LastEditTime: 2025-01-20 00:00:00
- * @LastEditors: weisheng
- * @Description: wd-waterfall-item 瀑布流项目组件类型定义
- * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-waterfall-item/types.ts
- * 记得注释
- */
-
-import type { ExtractPropTypes } from 'vue'
 import { baseProps } from '../common/props'
 
 /**

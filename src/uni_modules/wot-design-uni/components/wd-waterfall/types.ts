@@ -1,13 +1,3 @@
-/*
- * @Author: weisheng
- * @Date: 2025-01-20 00:00:00
- * @LastEditTime: 2025-01-20 00:00:00
- * @LastEditors: weisheng
- * @Description: wd-waterfall 瀑布流组件类型定义
- * @FilePath: /wot-design-uni/src/uni_modules/wot-design-uni/components/wd-waterfall/types.ts
- * 记得注释
- */
-
 import type { InjectionKey } from 'vue'
 import type { WaterfallItemInfo } from '../wd-waterfall-item/types'
 import { baseProps } from '../common/props'
