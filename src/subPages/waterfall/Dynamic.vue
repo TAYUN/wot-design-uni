@@ -116,7 +116,9 @@ function onDelete(item: ListItem) {
         <template #default="{ loaded }">
           <view class="waterfall-item">
             <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
-            <wd-button custom-class="delete-button" size="small" type="error" @click="onDelete(item)">删除</wd-button>
+            <view class="delete-button">
+              <wd-button size="small" type="error" @click="onDelete(item)">删除</wd-button>
+            </view>
           </view>
         </template>
       </wd-waterfall-item>
