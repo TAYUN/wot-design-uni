@@ -19,7 +19,7 @@ export default {
  * 4. 提供加载完成回调给内容组件
  * 5. 支持平滑的显示动画效果
  */
-
+import WdSlotWrapper from './wd-slot-wrapper.vue'
 import {
   computed,
   getCurrentInstance,
@@ -253,12 +253,16 @@ async function handleFailureRetry() {
 
 // 模式4：完整模式 - 原有的三层处理机制
 async function handleFailureFinal() {
+  console.log('retryCount', retryCount)
+
   if (retryCount > 0) {
     retryCount--
     await item.refreshImage(false)
   } else {
     // 进入占位图片阶段
     setStatus(ItemStatus.ORIGINAL_FAILED, '原始内容加载失败')
+    await item.updateHeight()
+    item.loaded = true
   }
 }
 /**
@@ -267,6 +271,7 @@ async function handleFailureFinal() {
  * 通知父组件进行重新布局
  */
 async function loaded(event?: any) {
+  console.log('event', item.index, event)
   if (props.width && props.height) return
   if (overtime) return // 已超时，忽略后续加载事件
   item.loadSuccess = event?.type === 'load'
@@ -357,6 +362,7 @@ async function updateHeight(flag = false) {
     if (flag) {
       item.loaded = true
     }
+    console.log('item', item)
   }
 }
 /**
@@ -368,8 +374,9 @@ async function refreshImage(isReset = true) {
   item.loaded = false
   item.loadSuccess = false
   item.heightError = false
-  setStatus(ItemStatus.NONE)
+  // setStatus(ItemStatus.NONE) // 为什么要设置这个
   slotId.value = uuid()
+
   // 重新启动超时计时器 todo 这里应该打开吗？需要使用参数控制是否重新启动定时器吗？
   if (isReset && context?.maxWait) {
     overtime = false
@@ -441,9 +448,25 @@ const waterfallItemStyle = computed(() => {
       : 'opacity var(--wd-waterfall-duration) ease-out' // 仅包含透明度动画
   }
 })
-
 // ==================== 组件暴露接口 ====================
-
+watch(
+  () => slotId.value,
+  () => {
+    console.log('slotId.value', slotId.value)
+    forceRerender()
+  }
+)
+const renderFlag = ref(true)
+// 需要刷新时调用
+function forceRerender() {
+  renderFlag.value = false
+  nextTick(() => {
+    renderFlag.value = true
+  })
+}
+function slotMounted() {
+  console.log('slotMounted')
+}
 /**
  * 暴露给父组件的方法和属性
  * 当前为空，可根据需要扩展
@@ -457,7 +480,9 @@ defineExpose<WaterfallItemExpose>({})
     :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible || context.isReflowing, 'is-reflowing': context.isReflowing }]"
     :style="[waterfallItemStyle, customStyle]"
   >
-    <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
+    <wd-slot-wrapper v-if="renderFlag">
+      <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
+    </wd-slot-wrapper>
   </view>
 </template>
 
