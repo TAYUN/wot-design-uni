@@ -449,24 +449,7 @@ const waterfallItemStyle = computed(() => {
   }
 })
 // ==================== 组件暴露接口 ====================
-watch(
-  () => slotId.value,
-  () => {
-    console.log('slotId.value', slotId.value)
-    forceRerender()
-  }
-)
-const renderFlag = ref(true)
-// 需要刷新时调用
-function forceRerender() {
-  renderFlag.value = false
-  nextTick(() => {
-    renderFlag.value = true
-  })
-}
-function slotMounted() {
-  console.log('slotMounted')
-}
+
 /**
  * 暴露给父组件的方法和属性
  * 当前为空，可根据需要扩展
@@ -480,9 +463,7 @@ defineExpose<WaterfallItemExpose>({})
     :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible || context.isReflowing, 'is-reflowing': context.isReflowing }]"
     :style="[waterfallItemStyle, customStyle]"
   >
-    <wd-slot-wrapper v-if="renderFlag">
-      <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
-    </wd-slot-wrapper>
+    <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
   </view>
 </template>
 
