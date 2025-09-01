@@ -44,10 +44,8 @@ const isShow = ref<boolean>(props?.show ?? true)
 // 容器是否活跃
 const isActive = computed(() => {
   if (props?.show !== undefined) {
-    console.log('外部内部状态 isShow', props?.show)
     return props?.show
   }
-  console.log('内部状态 isShow', isShow.value)
   return isShow.value
 })
 
