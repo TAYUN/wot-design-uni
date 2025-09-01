@@ -176,44 +176,46 @@ onMounted(async () => {
       @load-end="loadEnd"
     >
       <wd-waterfall-item v-for="item in items" :key="item.id" :index="item.index" class="waterfall-item">
-        <template #default="{ loaded, errorInfo }">
-          <!-- 第一层：原始内容 -->
-          <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
+        <template #default="{ loaded, errorInfo, key }">
+          <view v-for="i in 1" :key="key + i">
+            <!-- 第一层：原始内容 -->
+            <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
 
-          <!-- 第二层：占位图片 -->
-          <view v-else-if="['fail', 'phok'].includes(errorInfo.status)" class="placeholder-container">
-            <image
-              :src="placeholderSrc"
-              mode="aspectFill"
-              class="placeholder-image"
-              @load="errorInfo.placeholder.load"
-              @error="errorInfo.placeholder.error"
-            />
-          </view>
+            <!-- 第二层：占位图片 -->
+            <view v-else-if="['fail', 'phok'].includes(errorInfo.status)" class="placeholder-container">
+              <image
+                :src="placeholderSrc"
+                mode="aspectFill"
+                class="placeholder-image"
+                @load="errorInfo.placeholder.load"
+                @error="errorInfo.placeholder.error"
+              />
+            </view>
 
-          <!-- 第三层：最终兜底方案（占位图片失败或超时） -->
-          <view v-else class="fallback-container">
-            <view class="fallback-content">
-              <text class="fallback-message">
-                {{ errorInfo.message || '图片加载失败' }}
-              </text>
-              <text>
-                {{ getErrorTypeText(errorInfo.status) }}
-              </text>
+            <!-- 第三层：最终兜底方案（占位图片失败或超时） -->
+            <view v-else class="fallback-container">
+              <view class="fallback-content">
+                <text class="fallback-message">
+                  {{ errorInfo.message || '图片加载失败' }}
+                </text>
+                <text>
+                  {{ getErrorTypeText(errorInfo.status) }}
+                </text>
+              </view>
             </view>
-          </view>
 
-          <!-- 其他内容始终显示 -->
-          <view class="item-content">
-            <view class="item-title">
-              {{ item.title }}
+            <!-- 其他内容始终显示 -->
+            <view class="item-content">
+              <view class="item-title">
+                {{ item.title }}
+              </view>
+              <view class="item-info">
+                <text class="info-text">ID: {{ item.id }}</text>
+                <text class="info-text">Index: {{ item.index }}</text>
+                <text v-if="errorInfo.status !== 'none'" class="error-text">错误: {{ errorInfo.status }}</text>
+              </view>
+              <wd-button size="small" type="error" @click="removeItem(item.index)">删除此项</wd-button>
             </view>
-            <view class="item-info">
-              <text class="info-text">ID: {{ item.id }}</text>
-              <text class="info-text">Index: {{ item.index }}</text>
-              <text v-if="errorInfo.status !== 'none'" class="error-text">错误: {{ errorInfo.status }}</text>
-            </view>
-            <wd-button size="small" type="error" @click="removeItem(item.index)">删除此项</wd-button>
           </view>
         </template>
       </wd-waterfall-item>
