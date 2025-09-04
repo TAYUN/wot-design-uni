@@ -72,16 +72,12 @@ function navigateTo(url: string) {
 }
 
 .nav-item.active {
-  background-color: #3b82f6;
+  background-color: #cad6eb;
   color: white;
 }
-
-.nav-item:hover {
-  background-color: #e5e7eb;
-}
-
-.nav-item.active:hover {
-  background-color: #2563eb;
+.nav-item.hover {
+  background-color: #bcd1f5;
+  color: white;
 }
 
 .nav-text {

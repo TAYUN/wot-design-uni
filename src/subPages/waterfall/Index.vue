@@ -191,40 +191,38 @@ onHide(() => {
 
     <wd-waterfall class="waterfall-container" :show="show" @load-end="loadEnd" error-mode="fallback">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :index="index">
-        <template #default="{ loaded, errorInfo, key }">
-          <template v-for="i in 1" :key="key + i">
-            <view class="waterfall-item">
-              <!-- 第一层：正常内容 -->
-              <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
-              <!-- 第二层：占位图片 -->
-              <view v-else-if="['fail', 'phok'].includes(errorInfo.status)" class="fallback-container">
-                <image
-                  :src="placeholderSrc"
-                  mode="aspectFill"
-                  class="fallback-image"
-                  @load="errorInfo.placeholder.load"
-                  @error="errorInfo.placeholder.error"
-                />
-              </view>
-              <!-- 第三层：最终兜底 -->
-              <view v-else class="final-fallback">
-                <view class="fallback-content">
-                  <text class="fallback-text">
-                    {{ errorInfo.message || '图片加载失败' }}
-                  </text>
-                  <text class="fallback-type">
-                    {{ getErrorTypeText(errorInfo.status) }}
-                  </text>
-                </view>
-              </view>
-              <view class="item-content">
-                <view class="item-title">
-                  {{ item.title }}
-                </view>
-                <wd-button size="small" type="error" @click="removeItem(index)">删除此项</wd-button>
+        <template #default="{ loaded, errorInfo }">
+          <view class="waterfall-item">
+            <!-- 第一层：正常内容 -->
+            <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
+            <!-- 第二层：占位图片 -->
+            <view v-else-if="['fail', 'phok'].includes(errorInfo.status)" class="fallback-container">
+              <image
+                :src="placeholderSrc"
+                mode="aspectFill"
+                class="fallback-image"
+                @load="errorInfo.placeholder.load"
+                @error="errorInfo.placeholder.error"
+              />
+            </view>
+            <!-- 第三层：最终兜底 -->
+            <view v-else class="final-fallback">
+              <view class="fallback-content">
+                <text class="fallback-text">
+                  {{ errorInfo.message || '图片加载失败' }}
+                </text>
+                <text class="fallback-type">
+                  {{ getErrorTypeText(errorInfo.status) }}
+                </text>
               </view>
             </view>
-          </template>
+            <view class="item-content">
+              <view class="item-title">
+                {{ item.title }}
+              </view>
+              <wd-button size="small" type="error" @click="removeItem(index)">删除此项</wd-button>
+            </view>
+          </view>
         </template>
       </wd-waterfall-item>
     </wd-waterfall>
@@ -251,6 +249,7 @@ onHide(() => {
 }
 
 .waterfall-item {
+  position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;

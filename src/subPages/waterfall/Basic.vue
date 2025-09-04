@@ -11,7 +11,7 @@ interface ListItem {
 }
 
 const list = ref<ListItem[]>([])
-
+const placeholderSrc = 'https://wot-ui.cn/logo.png'
 function getData() {
   return new Promise<ListItem[]>((resolve) => {
     const data = Array(10)
@@ -43,12 +43,20 @@ onReachBottom(async () => {
 
 <template>
   <view>
-    <wd-waterfall class="waterfall-container" @load-end="loadEnd">
+    <wd-waterfall class="waterfall-container" @load-end="loadEnd" error-mode="placeholder">
       <wd-waterfall-item v-for="(item, index) in list" :key="index">
-        <template #default="{ loaded }">
-          <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
-          <view class="item-title">
-            {{ item.title }}
+        <template #default="{ loaded, errorInfo }">
+          <view class="waterfall-item">
+            <image v-if="errorInfo.status === 'none'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
+            <image
+              v-if="['fail', 'phok'].includes(errorInfo.status)"
+              mode="widthFix"
+              class="waterfall-image"
+              :src="placeholderSrc"
+              @load="errorInfo.placeholder.load"
+              @error="errorInfo.placeholder.error"
+            />
+            <view class="item-title">{{ item.title }}{{ errorInfo.status }}</view>
           </view>
         </template>
       </wd-waterfall-item>
@@ -64,6 +72,15 @@ onReachBottom(async () => {
 .waterfall-container {
   margin-left: 0.5rem;
   margin-right: 0.5rem;
+}
+
+.waterfall-item {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .waterfall-image {
