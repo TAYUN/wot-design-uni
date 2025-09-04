@@ -309,6 +309,7 @@ async function loaded(event?: any) {
 
 /**
  * 第二层：占位图片加载成功
+ * 支付宝小程序未解决的bug: 其他项加载太快，会导致这个方法不执行
  */
 async function onPlaceholderLoad() {
   if (overtime) return // 已超时，忽略后续加载事件
