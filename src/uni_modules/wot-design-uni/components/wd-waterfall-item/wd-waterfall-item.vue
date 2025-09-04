@@ -19,7 +19,6 @@ export default {
  * 4. 提供加载完成回调给内容组件
  * 5. 支持平滑的显示动画效果
  */
-import WdSlotWrapper from './wd-slot-wrapper.vue'
 import {
   computed,
   getCurrentInstance,
@@ -253,8 +252,6 @@ async function handleFailureRetry() {
 
 // 模式4：完整模式 - 原有的三层处理机制
 async function handleFailureFinal() {
-  console.log('retryCount', retryCount)
-
   if (retryCount > 0) {
     retryCount--
     await item.refreshImage(false)
@@ -271,7 +268,6 @@ async function handleFailureFinal() {
  * 通知父组件进行重新布局
  */
 async function loaded(event?: any) {
-  console.log('event', item.index, event)
   if (props.width && props.height) return
   if (overtime) return // 已超时，忽略后续加载事件
   item.loadSuccess = event?.type === 'load'
@@ -317,6 +313,9 @@ async function loaded(event?: any) {
 async function onPlaceholderLoad() {
   if (overtime) return // 已超时，忽略后续加载事件
   setStatus(ItemStatus.PLACEHOLDER_SUCCESS, '占位图片加载成功')
+  // #ifdef MP-WEIXIN
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  // #endif
   await item.updateHeight()
   item.loaded = true
 }
@@ -362,7 +361,6 @@ async function updateHeight(flag = false) {
     if (flag) {
       item.loaded = true
     }
-    console.log('item', item)
   }
 }
 /**
@@ -386,14 +384,16 @@ async function refreshImage(isReset = true) {
 
 // ==================== 生命周期管理 ====================
 
+context.addItem(item)
 /**
  * 组件挂载时：将自己注册到父组件的项目列表中，并启动超时计时器
  */
-context.addItem(item)
 onMounted(async () => {
   // 判断是否开启固定宽度高度
   if (props.width && props.height) {
-    onLoadKnownSize()
+    setTimeout(() => {
+      onLoadKnownSize()
+    }, 0)
   }
   // 只有在 fallback 模式下才启动超时计时器
   if (context?.maxWait) {
