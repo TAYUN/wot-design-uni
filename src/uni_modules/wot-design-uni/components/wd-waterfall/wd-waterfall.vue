@@ -393,12 +393,14 @@ async function processQueue() {
       await waitItemLoaded(item)
 
       if (item.heightError) {
-        // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
-        liveTasks.forEach(({ reject, stop }) => {
-          reject(new Error('高度异常，排版中断，错误码1002'))
-          stop()
-        })
-        liveTasks.clear()
+        setTimeout(() => {
+          // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
+          liveTasks.forEach(({ reject, stop }) => {
+            reject(new Error('高度异常，排版中断，错误码1002'))
+            stop()
+          })
+          liveTasks.clear()
+        }, 0)
         return
       }
 
@@ -522,11 +524,11 @@ watch([() => props.columns, () => props.columnGap, () => props.rowGap], () => {
 watch(
   () => isActive.value,
   (newActive, oldActive) => {
-    console.log('isActive.value', isActive.value)
     if (newActive && !oldActive && pendingItems.length > 0) {
       isLayoutInterrupted.value = false // 重置中断信号
       // 必须要用 nextTick
       nextTick(() => {
+        console.log('重新触发排版')
         pendingItems.forEach((item) => {
           item.refreshImage()
         })
@@ -538,11 +540,14 @@ watch(
     }
     // 🔥 关键：页面失活时兜底清理
     if (!newActive && oldActive) {
-      liveTasks.forEach(({ reject, stop }) => {
-        reject(new Error('页面失活，排版中断，错误码1000'))
-        stop()
-      })
-      liveTasks.clear()
+      setTimeout(() => {
+        // 页面失活，兜底清理
+        liveTasks.forEach(({ reject, stop }) => {
+          reject(new Error('页面失活，排版中断，错误码1000'))
+          stop()
+        })
+        liveTasks.clear()
+      }, 0)
     }
   },
   {
