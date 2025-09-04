@@ -69,6 +69,7 @@ function navigateTo(url: string) {
   min-width: 0;
   color: white;
   border-radius: 0.25rem;
+  flex: 1 1 0%;
 }
 
 .nav-item.active {
