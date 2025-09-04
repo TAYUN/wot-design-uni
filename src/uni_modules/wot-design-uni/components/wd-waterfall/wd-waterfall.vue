@@ -530,7 +530,12 @@ watch(
       nextTick(() => {
         console.log('重新触发排版')
         pendingItems.forEach((item) => {
+          // #ifndef MP-WEIXIN
           item.refreshImage()
+          // #endif
+          // #ifdef MP-WEIXIN
+          item.updateHeight(true)
+          // #endif
         })
         setTimeout(() => {
           // 这里很重要，必要要包裹在setTimeout中
