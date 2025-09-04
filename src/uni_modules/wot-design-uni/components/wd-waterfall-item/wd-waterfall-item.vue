@@ -270,7 +270,7 @@ async function handleFailureFinal() {
 async function loaded(event?: any) {
   if (props.width && props.height) return
   if (overtime) return // 已超时，忽略后续加载事件
-  item.loadSuccess = event?.type === 'load'
+  item.loadSuccess = event?.type === 'load' || event?.type === 'onLoad'
   // 检查是否加载成功
   if (item.loadSuccess) {
     // 加载成功：更新高度并完成
@@ -341,6 +341,9 @@ async function updateHeight(flag = false) {
     // 如果父级排版中断，停止获取dom信息
     if (context.isLayoutInterrupted) return
     await nextTick() // 很重要不然会导致获取高度错误
+    // #ifdef MP-WEIXIN
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    // #endif
     // 查询 DOM 元素的边界信息，获取实际高度
     const rect = await getRect(`.${itemId}`, false, instance?.proxy)
     const rectHeight = rect?.height
@@ -391,9 +394,10 @@ context.addItem(item)
 onMounted(async () => {
   // 判断是否开启固定宽度高度
   if (props.width && props.height) {
+    // 解决小程序app的bug
     setTimeout(() => {
       onLoadKnownSize()
-    }, 0)
+    }, 16)
   }
   // 只有在 fallback 模式下才启动超时计时器
   if (context?.maxWait) {
