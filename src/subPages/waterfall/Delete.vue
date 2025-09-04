@@ -233,14 +233,14 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .button-container {
   display: flex;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .waterfall-item {
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
@@ -251,14 +251,14 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: #f3f4f6;
 }
 
 .placeholder-image {
   height: 100%;
   width: 100%;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   object-fit: cover;
 }
 
@@ -276,21 +276,21 @@ onMounted(async () => {
 }
 
 .fallback-message {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .item-content {
   background-color: white;
-  padding: 0.5rem;
+  padding: 8px;
 }
 
 .item-title {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .item-info {
   display: flex;
-  gap: 0.25rem;
+  gap: 4px;
   font-size: 12px;
 }
 
@@ -303,16 +303,16 @@ onMounted(async () => {
 }
 
 .status-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-  margin-top: 0.5rem;
-  border-radius: 1rem;
+  margin-left: 8px;
+  margin-right: 8px;
+  margin-top: 8px;
+  border-radius: 16px;
   background-color: #f9fafb;
-  padding: 1.5rem;
+  padding: 24px;
 }
 
 .status-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   text-align: center;
 
   &:last-child {
@@ -328,7 +328,7 @@ onMounted(async () => {
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 </style>
 

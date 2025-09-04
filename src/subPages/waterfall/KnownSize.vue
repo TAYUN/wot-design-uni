@@ -71,15 +71,15 @@ onReachBottom(async () => {
 
 <style lang="scss" scoped>
 .waterfall-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .waterfall-item {
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
@@ -90,13 +90,13 @@ onReachBottom(async () => {
 }
 
 .waterfall-content {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: 8px;
+  padding: 8px;
+  font-size: 14px;
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 </style>
 

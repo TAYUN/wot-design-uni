@@ -53,7 +53,7 @@ function navigateTo(url: string) {
   align-items: center;
   background-color: white;
   border-top: 1px solid #e5e7eb;
-  padding: 0.25rem;
+  padding: 4px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
@@ -61,14 +61,14 @@ function navigateTo(url: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 0.25rem;
-  margin: 0 0.125rem;
+  padding: 8px 4px;
+  margin: 0 2px;
   transition: all 0.2s;
   cursor: pointer;
   background-color: #386fdf;
   min-width: 0;
   color: white;
-  border-radius: 0.25rem;
+  border-radius: 4px;
   flex: 1 1 0%;
 }
 
@@ -82,7 +82,7 @@ function navigateTo(url: string) {
 }
 
 .nav-text {
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;

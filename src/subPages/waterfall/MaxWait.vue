@@ -60,15 +60,15 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .waterfall-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .waterfall-item {
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
@@ -93,20 +93,20 @@ onMounted(async () => {
   left: 0;
   top: 0;
   background-color: #ef4444;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  font-size: 0.875rem;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 14px;
   color: white;
 }
 
 .waterfall-content {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: 8px;
+  padding: 8px;
+  font-size: 14px;
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 </style>
 

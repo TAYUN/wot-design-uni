@@ -68,16 +68,16 @@ onReachBottom(async () => {
 
 <style lang="scss" scoped>
 .slider-control {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .waterfall-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 
 .iamge-node {

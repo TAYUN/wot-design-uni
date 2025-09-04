@@ -311,12 +311,12 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .page-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .content-section {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .section-title {
@@ -324,39 +324,39 @@ onMounted(async () => {
 }
 
 .controls-container {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .button-container {
   display: flex;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 
 .control-group {
   display: flex;
   align-items: center;
-  margin-bottom: 15rpx;
+  margin-bottom: 7.5px;
 
   text {
-    width: 200rpx;
-    font-size: 28rpx;
+    width: 100px;
+    font-size: 14px;
     color: #666;
   }
 
   slider {
     flex: 1;
-    margin-left: 20rpx;
+    margin-left: 10px;
   }
 }
 
 .demo-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 24rpx;
+  font-size: 12px;
   color: #666;
 
   text {
@@ -374,21 +374,21 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
+  padding: 10px;
+  margin-bottom: 10px;
   background: #f0f8ff;
-  border: 2rpx solid #007aff;
-  border-radius: 12rpx;
+  border: 1px solid #007aff;
+  border-radius: 6px;
   color: #007aff;
-  font-size: 28rpx;
+  font-size: 14px;
 
   .loading-spinner {
-    width: 32rpx;
-    height: 32rpx;
-    border: 4rpx solid #e3f2fd;
-    border-top: 4rpx solid #007aff;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e3f2fd;
+    border-top: 2px solid #007aff;
     border-radius: 50%;
-    margin-right: 15rpx;
+    margin-right: 7.5px;
     animation: spin 1s linear infinite;
   }
 }
@@ -407,8 +407,8 @@ onMounted(async () => {
   position: relative;
   width: 100%;
   background: #fff;
-  border: 2rpx solid #eee;
-  border-radius: 12rpx;
+  border: 1px solid #eee;
+  border-radius: 6px;
   overflow: hidden;
 }
 
@@ -416,7 +416,7 @@ onMounted(async () => {
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
@@ -437,19 +437,19 @@ onMounted(async () => {
 
 .item-id {
   color: white;
-  font-size: 28rpx;
+  font-size: 14px;
   font-weight: bold;
-  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.3);
+  text-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.3);
 }
 
 .item-info {
-  padding: 8rpx;
+  padding: 4px;
   background: rgba(0, 0, 0, 0.05);
   text-align: center;
 }
 
 .item-size {
-  font-size: 20rpx;
+  font-size: 10px;
   color: #666;
 }
 </style>

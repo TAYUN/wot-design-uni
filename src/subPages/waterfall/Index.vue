@@ -239,34 +239,34 @@ onHide(() => {
 }
 
 .button-row-second {
-  margin-top: 0.5rem;
+  margin-top: 8px;
   display: flex;
 }
 
 .waterfall-container {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
 .waterfall-item {
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background-color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .item-content {
-  padding: 0.5rem;
+  padding: 8px;
 }
 
 .item-title {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
 }
 
 .bottom-spacing {
-  padding: 2.5rem;
+  padding: 40px;
 }
 
 // 错误处理相关样式
@@ -299,14 +299,14 @@ onHide(() => {
 }
 
 .fallback-text {
-  font-size: 28rpx;
+  font-size: 14px;
   color: #999;
   display: block;
-  margin-bottom: 8rpx;
+  margin-bottom: 4px;
 }
 
 .fallback-type {
-  font-size: 24rpx;
+  font-size: 12px;
   color: #ccc;
   display: block;
 }
