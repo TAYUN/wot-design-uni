@@ -51,7 +51,7 @@ onReachBottom(async () => {
           <view class="waterfall-item">
             <image v-if="errorInfo.status === 'none'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
             <image
-              v-if="['fail', 'phok'].includes(errorInfo.status)"
+              v-else-if="errorInfo.status === 'fail'"
               mode="widthFix"
               class="waterfall-image"
               :src="placeholderSrc"

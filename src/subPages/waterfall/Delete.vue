@@ -174,7 +174,7 @@ onMounted(async () => {
             <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
 
             <!-- 第二层：占位图片 -->
-            <view v-else-if="['fail', 'phok'].includes(errorInfo.status)" class="placeholder-container">
+            <view v-else-if="errorInfo.status === 'fail'" class="placeholder-container">
               <image
                 :src="placeholderSrc"
                 mode="aspectFill"
