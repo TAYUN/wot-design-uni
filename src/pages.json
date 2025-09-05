@@ -1042,6 +1042,21 @@
           }
         },
         {
+          "path": "waterfall/Case1",
+          "name": "waterfall-case1",
+          "style": {
+            "mp-alipay": {
+              "allowsBounceVertical": "NO"
+            },
+            // #ifdef MP
+            "navigationBarTitleText": "Waterfall 案例1",
+            // #endif
+            // #ifndef MP
+            "navigationBarTitleText": "Waterfall 案例1"
+            // #endif
+          }
+        },
+        {
           "path": "waterfall/Columns",
           "name": "waterfall-columns",
           "style": {
@@ -1133,13 +1148,13 @@
         },
         {
           "path": "waterfall/Dynamic",
-          "name": "waterfall-nodom",
+          "name": "waterfall-dynamic",
           "style": {
             "mp-alipay": {
               "allowsBounceVertical": "NO"
             },
             // #ifdef MP
-            "navigationBarTitleText": "Waterfall 动态DOM",
+            "navigationBarTitleText": "Waterfall Dynamic",
             // #endif
             // #ifndef MP
             "navigationBarTitleText": "Waterfall Dynamic"
