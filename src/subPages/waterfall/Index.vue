@@ -3,8 +3,9 @@ import { onHide, onReachBottom, onShow } from '@dcloudio/uni-app'
 import { onMounted, ref } from 'vue'
 
 import NavTab from './components/NavTab.vue'
-import { text } from './utils/mock'
-import MockImage from './components/MockImage.vue'
+import { mockImages, text } from './utils/mock'
+import { uuid } from '@/uni_modules/wot-design-uni/components/common/util'
+// import MockImage from './components/MockImage.vue'
 
 interface ListItem {
   title: string
@@ -12,6 +13,7 @@ interface ListItem {
     width: number
     height: number
   }
+  url: string
   id: number | string
 }
 
@@ -49,7 +51,6 @@ function getErrorTypeText(status: string) {
 }
 
 function loadEnd() {}
-let nextId = 1
 // 生成单个数据项
 function generateItem(index: number) {
   const min = 5
@@ -58,11 +59,12 @@ function generateItem(index: number) {
   const length = random(min, max)
   return {
     title: `${index}--${text.slice(startIndex, startIndex + length)}`,
-    id: nextId++,
+    id: uuid(),
     img: {
       width: random(100, 300),
       height: random(100, 300)
-    }
+    },
+    url: mockImages[index % mockImages.length]
   }
 }
 
@@ -190,11 +192,11 @@ onHide(() => {
     </view>
 
     <wd-waterfall class="waterfall-container" :show="show" @load-end="loadEnd" error-mode="fallback">
-      <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :index="index">
+      <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
         <template #default="{ loaded, errorInfo }">
           <view class="waterfall-item">
             <!-- 第一层：正常内容 -->
-            <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
+            <image v-if="errorInfo.status === 'none'" mode="widthFix" :src="item.url" @load="loaded" @error="loaded" />
             <!-- 第二层：占位图片 -->
             <view v-else-if="errorInfo.status === 'fail'" class="fallback-container">
               <image

@@ -4,10 +4,12 @@ import { onReachBottom } from '@dcloudio/uni-app'
 
 import NavTab from './components/NavTab.vue'
 import { mockImages, random, text } from './utils/mock'
+import { uuid } from '@/uni_modules/wot-design-uni/components/common/util'
 
 interface ListItem {
   title: string
   url: string
+  id: string
 }
 
 const list = ref<ListItem[]>([])
@@ -23,7 +25,8 @@ function getData() {
         const length = random(min, max)
         return {
           title: text.slice(startIndex, startIndex + length),
-          url: mockImages[i % mockImages.length]
+          url: mockImages[i % mockImages.length],
+          id: uuid()
         }
       })
     resolve(data)
@@ -46,7 +49,7 @@ onReachBottom(async () => {
 <template>
   <view>
     <wd-waterfall class="waterfall-container" @load-end="loadEnd" error-mode="placeholder">
-      <wd-waterfall-item v-for="(item, index) in list" :key="index">
+      <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index">
         <template #default="{ loaded, errorInfo }">
           <view class="waterfall-item">
             <image v-if="errorInfo.status === 'none'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />

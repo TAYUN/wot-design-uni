@@ -167,12 +167,11 @@ onMounted(async () => {
 
     <!-- 瀑布流容器 -->
     <wd-waterfall ref="waterfallRef" :columns="2" :column-gap="10" :row-gap="10" error-mode="fallback" @load-end="loadEnd">
-      <wd-waterfall-item v-for="item in items" :key="item.id" :index="item.index">
+      <wd-waterfall-item v-for="item in items" :key="item.id" :order="item.index">
         <template #default="{ loaded, errorInfo }">
           <view class="waterfall-item">
             <!-- 第一层：原始内容 -->
             <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
-
             <!-- 第二层：占位图片 -->
             <view v-else-if="errorInfo.status === 'fail'" class="placeholder-container">
               <image

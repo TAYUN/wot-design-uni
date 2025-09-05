@@ -42,7 +42,7 @@ onMounted(() => {
         width: props.meta.width,
         height: props.meta.height
       },
-      type: Math.random() > 0.7 ? 'load' : 'error'
+      type: Math.random() > 0.5 ? 'load' : 'error'
     })
   }, random(50, 700))
 })

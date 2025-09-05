@@ -14,13 +14,14 @@ interface NavItem {
 const navItems = ref<NavItem[]>(
   props.items || [
     { label: '基础', value: '/subPages/waterfall/Basic' },
+    { label: '例1', value: '/subPages/waterfall/Case1' },
     { label: '模拟', value: '/subPages/waterfall/Index' },
     { label: '列变', value: '/subPages/waterfall/Columns' },
     { label: '已知', value: '/subPages/waterfall/KnownSize' },
     { label: '删除', value: '/subPages/waterfall/Delete' },
     { label: '刷新', value: '/subPages/waterfall/Dynamic' },
-    { label: '超时', value: '/subPages/waterfall/MaxWait' },
-    { label: 'NO', value: '/subPages/waterfall/ReflowDemo' }
+    { label: '超时', value: '/subPages/waterfall/MaxWait' }
+    // { label: 'NO', value: '/subPages/waterfall/ReflowDemo' }
   ]
 )
 

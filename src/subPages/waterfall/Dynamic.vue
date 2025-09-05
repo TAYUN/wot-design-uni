@@ -112,7 +112,7 @@ function onDelete(item: ListItem) {
 <template>
   <view title="结合下拉刷新与触底加载">
     <wd-waterfall ref="waterfallRef" class="waterfall-container" :column-gap="10" :row-gap="4">
-      <wd-waterfall-item v-for="item in list" :key="item.id">
+      <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index">
         <template #default="{ loaded }">
           <view class="waterfall-item">
             <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
