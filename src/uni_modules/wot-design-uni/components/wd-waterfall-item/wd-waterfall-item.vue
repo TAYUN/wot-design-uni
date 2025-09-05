@@ -30,16 +30,12 @@ import {
   shallowReactive,
   shallowReadonly,
   watch,
-  shallowRef
+  shallowRef,
+  toRef,
+  type Ref
 } from 'vue'
 import { getRect, objToStyle, uuid } from '../common/util'
-import type {
-  // WaterfallItemEmits,
-  WaterfallItemExpose,
-  WaterfallItemInfo,
-  WaterfallItemProps,
-  WaterfallItemSlots
-} from './types'
+import type { WaterfallItemExpose, WaterfallItemInfo, WaterfallItemProps, WaterfallItemSlots } from './types'
 import { waterfallContextKey } from '../wd-waterfall/types'
 
 // 组件属性定义
@@ -158,7 +154,7 @@ const errorInfo = computed(() => ({
     load: onPlaceholderLoad,
     error: onPlaceholderError
   }
-  // retry: refreshImage,
+  // todo  单个加重试功能
 }))
 
 // ==================== 项目信息管理 ====================
@@ -179,7 +175,7 @@ const item = shallowReactive<WaterfallItemInfo>({
   height: 0, // 项目高度（DOM 实际高度）
   top: 0, // 垂直位置（由父组件计算）
   left: 0, // 水平位置（由父组件计算）
-  index: props.index,
+  order: toRef(props, 'order') as Ref<number>, // 使用类型断言确保类型为 Ref<number>
   updateHeight,
   refreshImage
 })
@@ -218,7 +214,7 @@ async function onLoadKnownSize() {
   item.loaded = true
   // 如果高度有问题，单独处理
   if (!item.height || item.heightError) {
-    console.warn('项目高度异常，但仍标记为已加载')
+    console.warn('已知高度-项目高度异常，但仍标记为已加载')
   }
   // todo 如果已知高度也加载失败了呢
 }
@@ -237,6 +233,13 @@ async function handleFailurePlaceholder() {
 
 // 模式3：重试模式 - 重试指定次数
 async function handleFailureRetry() {
+  // #ifdef MP-WEIXIN
+  // 微信小程序不支持重试，直接进入最终状态
+  setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
+  await item.updateHeight()
+  item.loaded = true
+  // #endif
+  // #ifndef MP-WEIXIN
   if (retryCount > 0) {
     retryCount--
     // 还有重试次数，重新加载
@@ -247,10 +250,18 @@ async function handleFailureRetry() {
     await item.updateHeight()
     item.loaded = true
   }
+  // #endif
 }
 
 // 模式4：完整模式 - 原有的三层处理机制
 async function handleFailureFinal() {
+  // #ifdef MP-WEIXIN
+  // 微信小程序不支持重试，直接进入失败状态
+  setStatus(ItemStatus.FAIL, '原始内容加载失败')
+  await item.updateHeight()
+  item.loaded = true
+  // #endif
+  // #ifndef MP-WEIXIN
   if (retryCount > 0) {
     retryCount--
     await item.refreshImage(false)
@@ -260,6 +271,7 @@ async function handleFailureFinal() {
     await item.updateHeight()
     item.loaded = true
   }
+  // #endif
 }
 /**
  * 第一层：原始内容加载完成回调
@@ -270,15 +282,17 @@ async function loaded(event?: any) {
   if (props.width && props.height) return
   if (overtime) return // 已超时，忽略后续加载事件
   item.loadSuccess = event?.type === 'load' || event?.type === 'onLoad'
+
   // 检查是否加载成功
   if (item.loadSuccess) {
     // 加载成功：更新高度并完成
     setStatus(ItemStatus.NONE)
     await item.updateHeight()
     item.loaded = true
+
     // 如果高度有问题，单独处理
     if (!item.height || item.heightError) {
-      console.warn('项目高度异常，但仍标记为已加载')
+      console.warn('load 项目高度异常，但仍标记为已加载')
     }
     return
   }
@@ -355,8 +369,8 @@ async function updateHeight(flag = false) {
     }
   } catch (error) {
     // 查询失败时静默处理，避免报错
-    console.error(error, `error高度获取失败，${item.height}`)
-
+    console.error(`error高度获取失败，${item}`, error)
+    // console.log('error-item', item)
     // void 0
   } finally {
     // 移除已处理的项目
@@ -386,11 +400,11 @@ async function refreshImage(isReset = true) {
 
 // ==================== 生命周期管理 ====================
 
-context.addItem(item)
 /**
  * 组件挂载时：将自己注册到父组件的项目列表中，并启动超时计时器
  */
 onMounted(async () => {
+  context.addItem(item)
   // 判断是否开启固定宽度高度
   if (props.width && props.height) {
     // 解决小程序app的bug

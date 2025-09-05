@@ -203,11 +203,10 @@ function addItem(item: WaterfallItemInfo) {
   pendingItems.push(item)
 
   // 检查是否为插入项目（而非末尾追加）
-  const isInsertItem = item.index !== undefined && item.index < items.length
-
+  const isInsertItem = item.order?.value !== undefined && item.order.value < items.length
   if (isInsertItem) {
     item.isInserted = true
-    items.splice(item.index!, 0, item)
+    items.splice(item.order!.value, 0, item)
   } else {
     // 末尾追加项目
     item.isInserted = false
@@ -256,8 +255,8 @@ function recalculateItemsAfterRemoval() {
 
   // 按照当前的index顺序排序所有剩余项目
   const sortedItems = [...items].sort((a, b) => {
-    const aIndex = a.index ?? 0
-    const bIndex = b.index ?? 0
+    const aIndex = a.order?.value ?? 0
+    const bIndex = b.order?.value ?? 0
     return aIndex - bIndex
   })
 
@@ -342,8 +341,8 @@ function fullReflowAfterInsert() {
 
   // 按照当前的index顺序排序所有项目
   const sortedItems = [...items].sort((a, b) => {
-    const aIndex = a.index ?? 0
-    const bIndex = b.index ?? 0
+    const aIndex = a.order!.value
+    const bIndex = b.order!.value
     return aIndex - bIndex
   })
 

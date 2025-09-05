@@ -1,3 +1,4 @@
+import { type Ref } from 'vue'
 import { baseProps } from '../common/props'
 
 /**
@@ -11,7 +12,7 @@ export const waterfallItemProps = {
   /**
    * 项目索引
    */
-  index: {
+  order: {
     type: Number,
     default: undefined
   },
@@ -37,7 +38,7 @@ export const waterfallItemProps = {
  * 瀑布流项目组件属性类型
  */
 export interface WaterfallItemProps {
-  index?: number
+  order?: number
   width?: number
   height?: number
   customClass?: string
@@ -74,9 +75,7 @@ export interface WaterfallItemSlots {
 /**
  * 瀑布流项目组件事件
  */
-export interface WaterfallItemEmits {
-  // 暂无事件
-}
+export interface WaterfallItemEmits {}
 
 /**
  * 瀑布流项目组件暴露的方法
@@ -124,7 +123,7 @@ export interface WaterfallItemInfo {
   /**
    * 项目索引
    */
-  index?: number
+  order?: Ref<number>
   /**
    * 更新高度方法
    */
