@@ -3,7 +3,7 @@ import { baseProps } from '../common/props'
 /**
  * 错误状态
  */
-export type Status = 'none' | 'fail' | 'phok' | 'timeout' | 'final'
+export type Status = 'none' | 'fail' | 'timeout' | 'final'
 /**
  * 瀑布流项目组件属性
  */

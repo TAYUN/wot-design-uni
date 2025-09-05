@@ -131,10 +131,9 @@ const FALLBACK_HEIGHT = 120 // 异常默认高度
 // 错误状态枚举
 const ItemStatus = {
   NONE: 'none',
-  ORIGINAL_FAILED: 'fail',
-  PLACEHOLDER_SUCCESS: 'phok',
+  FAIL: 'fail',
   TIMEOUT: 'timeout',
-  FINAL_FALLBACK: 'final'
+  FINAL: 'final'
 } as const
 
 type ItemStatusType = (typeof ItemStatus)[keyof typeof ItemStatus]
@@ -225,14 +224,14 @@ async function onLoadKnownSize() {
 }
 // 模式1：默认模式 - 失败就结束
 async function handleFailureNone() {
-  setStatus(ItemStatus.FINAL_FALLBACK, '加载失败')
+  setStatus(ItemStatus.FINAL, '加载失败')
   await item.updateHeight()
   item.loaded = true
 }
 
 // 模式2：占位图模式 - 失败后直接显示占位图片
 async function handleFailurePlaceholder() {
-  setStatus(ItemStatus.ORIGINAL_FAILED, '原始内容加载失败，显示占位图片')
+  setStatus(ItemStatus.FAIL, '原始内容加载失败，显示占位图片')
   // 不设置 loaded = true，让占位图片的加载回调来处理
 }
 
@@ -244,7 +243,7 @@ async function handleFailureRetry() {
     await item.refreshImage(false)
   } else {
     // 重试次数用完，结束处理
-    setStatus(ItemStatus.FINAL_FALLBACK, `重试${context.retryCount}次后仍然失败`)
+    setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
     await item.updateHeight()
     item.loaded = true
   }
@@ -257,7 +256,7 @@ async function handleFailureFinal() {
     await item.refreshImage(false)
   } else {
     // 进入占位图片阶段
-    setStatus(ItemStatus.ORIGINAL_FAILED, '原始内容加载失败')
+    setStatus(ItemStatus.FAIL, '原始内容加载失败')
     await item.updateHeight()
     item.loaded = true
   }
@@ -313,7 +312,6 @@ async function loaded(event?: any) {
  */
 async function onPlaceholderLoad() {
   if (overtime) return // 已超时，忽略后续加载事件
-  setStatus(ItemStatus.PLACEHOLDER_SUCCESS, '占位图片加载成功')
   // #ifdef MP-WEIXIN
   await new Promise((resolve) => setTimeout(resolve, 100))
   // #endif
@@ -326,7 +324,7 @@ async function onPlaceholderLoad() {
  */
 async function onPlaceholderError() {
   if (overtime) return // 已超时，忽略后续加载事件
-  setStatus(ItemStatus.FINAL_FALLBACK, '占位图片也加载失败')
+  setStatus(ItemStatus.FINAL, '占位图片也加载失败')
   // 最后显示最终兜底方案结束处理
   await item.updateHeight()
   item.loaded = true
