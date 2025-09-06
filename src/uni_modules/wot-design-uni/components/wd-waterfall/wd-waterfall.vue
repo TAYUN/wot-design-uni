@@ -92,7 +92,8 @@ onMounted(async () => {
  * - 'idle': 空闲状态，所有项目都已加载完成
  * - 'busy': 忙碌状态，有项目正在加载中
  */
-let loadStatus: 'idle' | 'busy' = 'idle'
+// let loadStatus.value: 'idle' | 'busy' = 'idle'
+const loadStatus = ref<'idle' | 'busy'>('idle')
 
 /**
  * 重排状态：用于控制重排时的动画效果
@@ -103,6 +104,11 @@ const isReflowing = ref(false)
  * 布局中断状态：用于通知子组件停止不必要的dom信息获取
  */
 const isLayoutInterrupted = ref(false)
+
+/**
+ * 队列暂停状态：用于临时暂停队列处理（如删除操作时）
+ */
+const isQueuePaused = ref(false)
 
 /**
  * 加载完成后的回调函数队列
@@ -116,7 +122,7 @@ let loadedHandlers: (() => void)[] = []
  */
 function loadDone(handler: () => void) {
   nextTick(() => {
-    if (loadStatus === 'idle') {
+    if (loadStatus.value === 'idle') {
       // 如果当前是空闲状态，立即执行回调
       handler()
     } else {
@@ -158,10 +164,10 @@ function updateLoadStatus() {
     // 执行所有等待的回调函数
     loadedHandlers.forEach((handler) => handler())
     loadedHandlers = []
-    loadStatus = 'idle'
+    loadStatus.value = 'idle'
     emit('loadEnd') // 触发加载完成事件
   } else {
-    loadStatus = 'busy'
+    loadStatus.value = 'busy'
     emit('loadStart') // 触发加载开始事件
   }
 }
@@ -214,7 +220,7 @@ function addItem(item: WaterfallItemInfo) {
   }
 
   // 触发首次开始排版 todo 会不会和isactive冲突并发？
-  if (loadStatus === 'idle') {
+  if (loadStatus.value === 'idle') {
     processQueue()
   }
 }
@@ -225,17 +231,33 @@ function addItem(item: WaterfallItemInfo) {
  * @param item 项目信息对象
  */
 function removeItem(item: WaterfallItemInfo) {
+  // 如果队列正在处理，暂停并重新开始
+  if (queueProcessing) {
+    isQueuePaused.value = true
+    // 清理当前处理
+    liveTasks.forEach(({ reject, stop }) => {
+      reject(new Error('删除操作中断排版'))
+      stop()
+    })
+    liveTasks.clear()
+    queueProcessing = false
+  }
+
+  // 执行删除逻辑
   if (items.includes(item)) {
     const arrayIndex = items.indexOf(item)
     items.splice(arrayIndex, 1)
-    // 从待排版队列中也隐藏
     const pendingIndex = pendingItems.indexOf(item)
     if (pendingIndex !== -1) {
       pendingItems.splice(pendingIndex, 1)
     }
-
-    // 删除后重新计算剩余项目的位置，防止因为index的不一致导致排版错误
     recalculateItemsAfterRemoval()
+
+    // 重置暂停状态并重新启动队列处理
+    isQueuePaused.value = false
+    if (pendingItems.length > 0) {
+      processQueue()
+    }
   }
 }
 
@@ -387,6 +409,13 @@ async function processQueue() {
 
     // 处理队列中的项目
     while (pendingItems.length > 0) {
+      // 检查队列是否被暂停
+      if (isQueuePaused.value) {
+        console.log('项目排版被暂停')
+        isQueuePaused.value = false // 重置暂停信号
+        return
+      }
+
       const item = pendingItems[0] // 取队列第一个项目
       // 检查项目是否已加载
       await waitItemLoaded(item)
@@ -403,6 +432,12 @@ async function processQueue() {
         return
       }
 
+      // 再次检查队列是否被暂停（因为 await 可能被中断）
+      if (isQueuePaused.value) {
+        console.log('项目排版被暂停')
+        isQueuePaused.value = false // 重置暂停信号
+        return
+      }
       // 检查是否为插入项目（使用addItem中设置的标记）
       if (item.isInserted) {
         // 6. 插入后进行全重排（类似删除后的处理）
@@ -436,7 +471,7 @@ async function processQueue() {
 
     // 全部排完后，兜底清理残余 watch
     liveTasks.forEach(({ reject, stop }) => {
-      reject(new Error('未知异常，错误码1003'))
+      reject(new Error('未知错误，排版中断，错误码1003'))
       stop()
     })
     liveTasks.clear()
@@ -444,8 +479,11 @@ async function processQueue() {
     // 更新加载状态
     updateLoadStatus()
   } catch (error) {
-    isLayoutInterrupted.value = true
-    console.error('error', error)
+    // 如果是删除操作的中断，不设置 isLayoutInterrupted
+    if (error.message !== '删除操作中断排版') {
+      isLayoutInterrupted.value = true
+      console.error('error', error)
+    }
     // console.log('pendingItems', pendingItems)
   } finally {
     queueProcessing = false
@@ -529,11 +567,11 @@ watch(
       nextTick(() => {
         console.log('重新触发排版')
         pendingItems.forEach((item) => {
-          // #ifndef MP-WEIXIN
-          item.refreshImage()
-          // #endif
-          // #ifdef MP-WEIXIN
+          // #ifdef MP-WEIXIN || MP-ALIPAY
           item.updateHeight(true)
+          // #endif
+          // #ifndef MP-WEIXIN || MP-ALIPAY
+          item.refreshImage()
           // #endif
         })
         setTimeout(() => {
@@ -601,7 +639,10 @@ provide(
 defineExpose<WaterfallExpose>({
   reflow, // 完整重排（重置所有状态）
   refreshReflow, // 刷新重排（重置所有状态，包括数据）
-  loadDone // 注册加载完成回调
+  loadDone, // 注册加载完成回调
+  get loadStatus() {
+    return loadStatus.value
+  }
 })
 
 // ==================== 样式计算 ====================

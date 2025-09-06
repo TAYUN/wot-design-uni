@@ -133,6 +133,10 @@ export interface WaterfallExpose {
    * 注册加载完成回调
    */
   loadDone: (handler: () => void) => void
+  /**
+   * 队列状态
+   */
+  loadStatus: 'idle' | 'busy'
 }
 
 /**
