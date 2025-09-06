@@ -233,13 +233,13 @@ async function handleFailurePlaceholder() {
 
 // 模式3：重试模式 - 重试指定次数
 async function handleFailureRetry() {
-  // #ifdef MP-WEIXIN
+  // #ifdef MP-WEIXIN || MP-ALIPAY
   // 微信小程序不支持重试，直接进入最终状态
   setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
   await item.updateHeight()
   item.loaded = true
   // #endif
-  // #ifndef MP-WEIXIN
+  // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
     retryCount--
     // 还有重试次数，重新加载
@@ -255,13 +255,14 @@ async function handleFailureRetry() {
 
 // 模式4：完整模式 - 原有的三层处理机制
 async function handleFailureFinal() {
-  // #ifdef MP-WEIXIN
+  if (overtime) return // 已超时，忽略后续加载事件
+  // #ifdef MP-WEIXIN || MP-ALIPAY
   // 微信小程序不支持重试，直接进入失败状态
   setStatus(ItemStatus.FAIL, '原始内容加载失败')
   await item.updateHeight()
   item.loaded = true
   // #endif
-  // #ifndef MP-WEIXIN
+  // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
     retryCount--
     await item.refreshImage(false)
@@ -326,7 +327,7 @@ async function loaded(event?: any) {
  */
 async function onPlaceholderLoad() {
   if (overtime) return // 已超时，忽略后续加载事件
-  // #ifdef MP-WEIXIN
+  // #ifdef MP-WEIXIN || MP-ALIPAY
   await new Promise((resolve) => setTimeout(resolve, 100))
   // #endif
   await item.updateHeight()
@@ -354,7 +355,7 @@ async function updateHeight(flag = false) {
     // 如果父级排版中断，停止获取dom信息
     if (context.isLayoutInterrupted) return
     await nextTick() // 很重要不然会导致获取高度错误
-    // #ifdef MP-WEIXIN
+    // #ifdef MP-WEIXIN || MP-ALIPAY
     await new Promise((resolve) => setTimeout(resolve, 100))
     // #endif
     // 查询 DOM 元素的边界信息，获取实际高度
