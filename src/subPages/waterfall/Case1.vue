@@ -95,6 +95,7 @@ function onReload() {
 
 // 触底加载更多
 onReachBottom(() => {
+  if (waterfallRef.value?.loadStatus === 'busy') return
   if (!refreshing.value && loadMoreStatus.value === 'loading') {
     loadMoreFetch(++currentPage.value)
   }
@@ -105,8 +106,9 @@ onMounted(() => {
 })
 
 // 删除
-function onDelete(item: ListItem) {
+function onDelete(item: ListItem, index: number) {
   list.value.splice(list.value.indexOf(item), 1)
+  console.log('删除', index)
 }
 
 // 头部插入
@@ -177,13 +179,13 @@ function clearAll() {
       <wd-button size="small" @click="insertBatch">批量插入</wd-button>
       <wd-button size="small" @click="clearAll">清空数据</wd-button>
     </view>
-    <wd-waterfall ref="waterfallRef" class="waterfall-container" :column-gap="10" :row-gap="4">
+    <wd-waterfall ref="waterfallRef" class="waterfall-container" error-mode="fallback">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
         <template v-slot:default="{ loaded }">
           <view class="waterfall-item">
             <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
             <view class="delete-button">
-              <wd-button size="small" type="error" @click="onDelete(item)">删除</wd-button>
+              <wd-button size="small" type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
             </view>
           </view>
         </template>
@@ -214,7 +216,6 @@ function clearAll() {
 
 .waterfall-image {
   width: 100%;
-  display: flex;
 }
 
 .delete-button {
