@@ -293,6 +293,7 @@ async function loaded(event?: any) {
 
     // 如果高度有问题，单独处理
     if (!item.height || item.heightError) {
+      console.log('item', item)
       console.warn('load 项目高度异常，但仍标记为已加载')
     }
     return
