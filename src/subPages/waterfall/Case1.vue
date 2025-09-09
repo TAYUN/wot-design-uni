@@ -185,7 +185,7 @@ function clearAll() {
           <view class="waterfall-item">
             <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
             <view class="delete-button">
-              <wd-button size="small" type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
+              <wd-button size="large" type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
             </view>
           </view>
         </template>
