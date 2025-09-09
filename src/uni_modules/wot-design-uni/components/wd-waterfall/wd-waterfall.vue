@@ -105,10 +105,7 @@ const isReflowing = ref(false)
  */
 const isLayoutInterrupted = ref(false)
 
-/**
- * 队列暂停状态：用于临时暂停队列处理（如删除操作时）
- */
-const isQueuePaused = ref(false)
+// 队列处理状态通过 queueProcessing 变量管理，删除操作等待队列完成
 
 /**
  * 加载完成后的回调函数队列
@@ -230,35 +227,34 @@ function addItem(item: WaterfallItemInfo) {
  * 当子组件卸载时调用，从列表中移除项目信息
  * @param item 项目信息对象
  */
-function removeItem(item: WaterfallItemInfo) {
-  // 如果队列正在处理，暂停并重新开始
-  if (queueProcessing) {
-    isQueuePaused.value = true
-    // 清理当前处理
-    liveTasks.forEach(({ reject, stop }) => {
-      reject(new Error('删除操作中断排版'))
-      stop()
-    })
-    liveTasks.clear()
-    queueProcessing = false
-  }
-
-  // 执行删除逻辑
-  if (items.includes(item)) {
-    const arrayIndex = items.indexOf(item)
-    items.splice(arrayIndex, 1)
-    const pendingIndex = pendingItems.indexOf(item)
-    if (pendingIndex !== -1) {
-      pendingItems.splice(pendingIndex, 1)
+async function removeItem(item: WaterfallItemInfo) {
+  const fn = () => {
+    const index = loadedHandlers.indexOf(fn)
+    if (index !== -1) {
+      loadedHandlers.splice(index, 1)
     }
-    recalculateItemsAfterRemoval()
+    // 执行删除逻辑
+    if (items.includes(item)) {
+      const arrayIndex = items.indexOf(item)
+      items.splice(arrayIndex, 1)
+      const pendingIndex = pendingItems.indexOf(item)
+      if (pendingIndex !== -1) {
+        pendingItems.splice(pendingIndex, 1)
+      }
+      recalculateItemsAfterRemoval()
 
-    // 重置暂停状态并重新启动队列处理
-    isQueuePaused.value = false
-    if (pendingItems.length > 0) {
-      processQueue()
+      // 如果还有待排版项目，重新启动队列处理
+      if (pendingItems.length > 0) {
+        processQueue()
+      }
     }
   }
+  // 如果队列正在处理，等待队列处理完毕，再执行删除逻辑
+  if (queueProcessing.value) {
+    loadedHandlers.push(fn)
+    return
+  }
+  fn()
 }
 
 /**
@@ -393,7 +389,7 @@ function fullReflowAfterInsert() {
 /**
  * 队列状态
  */
-let queueProcessing = false
+let queueProcessing = ref(false)
 
 /**
  * 处理排版队列
@@ -402,20 +398,13 @@ let queueProcessing = false
 
 async function processQueue() {
   try {
-    if (queueProcessing) return
-    queueProcessing = true
+    if (queueProcessing.value) return
+    queueProcessing.value = true
     updateLoadStatus()
     if (pendingItems.length === 0) return
 
     // 处理队列中的项目
     while (pendingItems.length > 0) {
-      // 检查队列是否被暂停
-      if (isQueuePaused.value) {
-        console.log('项目排版被暂停')
-        isQueuePaused.value = false // 重置暂停信号
-        return
-      }
-
       const item = pendingItems[0] // 取队列第一个项目
       // 检查项目是否已加载
       await waitItemLoaded(item)
@@ -432,12 +421,6 @@ async function processQueue() {
         return
       }
 
-      // 再次检查队列是否被暂停（因为 await 可能被中断）
-      if (isQueuePaused.value) {
-        console.log('项目排版被暂停')
-        isQueuePaused.value = false // 重置暂停信号
-        return
-      }
       // 检查是否为插入项目（使用addItem中设置的标记）
       if (item.isInserted) {
         // 6. 插入后进行全重排（类似删除后的处理）
@@ -471,7 +454,7 @@ async function processQueue() {
 
     // 全部排完后，兜底清理残余 watch
     liveTasks.forEach(({ reject, stop }) => {
-      reject(new Error('未知错误，排版中断，错误码1003'))
+      reject(new Error('未知错误，排版中断，错误码 1003'))
       stop()
     })
     liveTasks.clear()
@@ -480,13 +463,11 @@ async function processQueue() {
     updateLoadStatus()
   } catch (error) {
     // 如果是删除操作的中断，不设置 isLayoutInterrupted
-    if (error.message !== '删除操作中断排版') {
-      isLayoutInterrupted.value = true
-      console.error('error', error)
-    }
+    isLayoutInterrupted.value = true
+    console.error('error', error)
     // console.log('pendingItems', pendingItems)
   } finally {
-    queueProcessing = false
+    queueProcessing.value = false
   }
 }
 
