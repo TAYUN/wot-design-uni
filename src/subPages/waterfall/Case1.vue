@@ -21,7 +21,7 @@ const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, tim
 async function fetchApi(page: number) {
   await sleep(300)
   const getList = () =>
-    Array(12)
+    Array(4)
       .fill(0)
       .map((_, i) => {
         return {
