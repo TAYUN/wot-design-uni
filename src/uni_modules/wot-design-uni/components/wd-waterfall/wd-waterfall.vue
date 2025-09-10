@@ -146,6 +146,12 @@ const items: WaterfallItemInfo[] = []
 const pendingItems: WaterfallItemInfo[] = []
 
 /**
+ * 待删除项目队列
+ * 存储需要删除的项目，在排版队列为空时执行删除
+ */
+const pendingRemovalItems: WaterfallItemInfo[] = []
+
+/**
  * 列高度状态管理
  * 直接维护每列的当前高度，避免重复计算
  * 使用 reactive 确保对象内部属性变化能触发响应式更新
@@ -224,37 +230,41 @@ function addItem(item: WaterfallItemInfo) {
 
 /**
  * 移除瀑布流项目
- * 当子组件卸载时调用，从列表中移除项目信息
+ * 当子组件卸载时调用，将项目加入删除队列
  * @param item 项目信息对象
  */
 async function removeItem(item: WaterfallItemInfo) {
-  const fn = () => {
-    const index = loadedHandlers.indexOf(fn)
-    if (index !== -1) {
-      loadedHandlers.splice(index, 1)
-    }
-    // 执行删除逻辑
-    if (items.includes(item)) {
-      const arrayIndex = items.indexOf(item)
-      items.splice(arrayIndex, 1)
-      const pendingIndex = pendingItems.indexOf(item)
-      if (pendingIndex !== -1) {
-        pendingItems.splice(pendingIndex, 1)
-      }
-      recalculateItemsAfterRemoval()
+  // 将项目加入删除队列，等待排版队列为空时执行
+  if (items.includes(item) && !pendingRemovalItems.includes(item)) {
+    pendingRemovalItems.push(item)
 
-      // 如果还有待排版项目，重新启动队列处理
-      if (pendingItems.length > 0) {
-        processQueue()
-      }
+    // 如果当前没有待排版项目，立即处理删除队列
+    if (pendingItems.length === 0) {
+      processPendingRemovals()
     }
   }
-  // 如果队列正在处理，等待队列处理完毕，再执行删除逻辑
-  if (queueProcessing.value) {
-    loadedHandlers.push(fn)
-    return
-  }
-  fn()
+}
+
+/**
+ * 处理待删除项目队列
+ * 批量执行删除操作并重新计算布局
+ */
+function processPendingRemovals() {
+  if (pendingRemovalItems.length === 0) return
+
+  // 批量删除所有待删除项目
+  pendingRemovalItems.forEach((item) => {
+    const arrayIndex = items.indexOf(item)
+    if (arrayIndex !== -1) {
+      items.splice(arrayIndex, 1)
+    }
+  })
+
+  // 清空删除队列
+  pendingRemovalItems.length = 0
+
+  // 重新计算布局
+  recalculateItemsAfterRemoval()
 }
 
 /**
@@ -338,6 +348,7 @@ async function waitItemLoaded(item: WaterfallItemInfo) {
     const stop = watch(
       () => item.loaded,
       (v) => {
+        console.log('item.loaded', item.loaded, item, pendingItems)
         if (v) {
           stop()
           liveTasks.delete(key)
@@ -346,6 +357,7 @@ async function waitItemLoaded(item: WaterfallItemInfo) {
       },
       { immediate: true }
     )
+
     liveTasks.set(key, { resolve, reject, stop })
   })
 }
@@ -389,7 +401,7 @@ function fullReflowAfterInsert() {
 /**
  * 队列状态
  */
-let queueProcessing = ref(false)
+let queueProcessing = false
 
 /**
  * 处理排版队列
@@ -398,8 +410,8 @@ let queueProcessing = ref(false)
 
 async function processQueue() {
   try {
-    if (queueProcessing.value) return
-    queueProcessing.value = true
+    if (queueProcessing) return
+    queueProcessing = true
     updateLoadStatus()
     if (pendingItems.length === 0) return
 
@@ -409,6 +421,17 @@ async function processQueue() {
       // 检查项目是否已加载
       await waitItemLoaded(item)
 
+      if (!isActive.value) {
+        setTimeout(() => {
+          // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
+          liveTasks.forEach(({ reject, stop }) => {
+            reject(new Error('页面失活，排版中断，错误码1001'))
+            stop()
+          })
+          liveTasks.clear()
+        }, 0)
+        return
+      }
       if (item.heightError) {
         setTimeout(() => {
           // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
@@ -428,7 +451,6 @@ async function processQueue() {
       } else {
         // 正常追加项目的处理逻辑
         const currentMinColumn = getMinColumn()
-
         // 计算项目位置
         item.top = currentMinColumn.height + props.rowGap
         item.left = (props.columnGap + columnWidth.value) * currentMinColumn.colIndex
@@ -436,10 +458,13 @@ async function processQueue() {
         const newHeight = item.top + item.height
         columns[targetColumnIndex].height = newHeight
       }
+      console.log('processQueue', item.height)
 
       // 设置可见状态
       item.visible = true
-
+      if (item.testing) {
+        console.log('异常的item', item)
+      }
       // 从队列中移除已排版的项目
       containerHeight.value = Math.max(...columns.map((col) => col.height), 0)
       pendingItems.shift()
@@ -450,11 +475,16 @@ async function processQueue() {
     // 所有项目处理完成后，清除全局重排状态
     if (pendingItems.length === 0) {
       isReflowing.value = false
+
+      // 处理待删除项目队列
+      if (pendingRemovalItems.length > 0) {
+        processPendingRemovals()
+      }
     }
 
     // 全部排完后，兜底清理残余 watch
     liveTasks.forEach(({ reject, stop }) => {
-      reject(new Error('未知错误，排版中断，错误码 1003'))
+      reject(new Error('未知错误，排版中断，错误码1003'))
       stop()
     })
     liveTasks.clear()
@@ -467,7 +497,7 @@ async function processQueue() {
     console.error('error', error)
     // console.log('pendingItems', pendingItems)
   } finally {
-    queueProcessing.value = false
+    queueProcessing = false
   }
 }
 
@@ -513,6 +543,8 @@ async function refreshReflow() {
 
   // 重新构建待排版队列
   pendingItems.length = 0
+  // 清空删除队列
+  pendingRemovalItems.length = 0
   // 如果是刷新数据，items要重置
   items.length = 0
 }
@@ -546,7 +578,7 @@ watch(
       isLayoutInterrupted.value = false // 重置中断信号
       // 必须要用 nextTick
       nextTick(() => {
-        console.log('重新触发排版')
+        console.log('重新触发排版---', pendingItems)
         pendingItems.forEach((item) => {
           // #ifdef MP-WEIXIN || MP-ALIPAY
           item.updateHeight(true)
@@ -571,6 +603,7 @@ watch(
         })
         liveTasks.clear()
       }, 0)
+      console.log('pendingItems', pendingItems)
     }
   },
   {

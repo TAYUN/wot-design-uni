@@ -167,14 +167,15 @@ const instance = getCurrentInstance()
  * 包含项目的所有状态信息，会被父组件用于布局计算
  */
 const item = shallowReactive<WaterfallItemInfo>({
+  id: uuid(),
   loaded: false, // 是否加载完成（图片等资源）
+  height: 0, // 项目高度（DOM 实际高度）
   loadSuccess: false, // 是否加载成功
+  top: 0, // 垂直位置（由父组件计算）
+  left: 0, // 水平位置（由父组件计算）
   visible: false, // 是否可见（由父组件控制）
   isInserted: false, // 是否插入项目
   heightError: false, // 是否高度异常
-  height: 0, // 项目高度（DOM 实际高度）
-  top: 0, // 垂直位置（由父组件计算）
-  left: 0, // 水平位置（由父组件计算）
   order: toRef(props, 'order') as Ref<number>, // 使用类型断言确保类型为 Ref<number>
   updateHeight,
   refreshImage
@@ -237,7 +238,9 @@ async function handleFailureRetry() {
   // 微信小程序不支持重试，直接进入最终状态
   setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
   await item.updateHeight()
-  item.loaded = true
+  setTimeout(() => {
+    item.loaded = true
+  }, 0)
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -260,7 +263,11 @@ async function handleFailureFinal() {
   // 微信小程序不支持重试，直接进入失败状态
   setStatus(ItemStatus.FAIL, '原始内容加载失败')
   await item.updateHeight()
-  item.loaded = true
+  setTimeout(() => {
+    item.loaded = true
+  }, 0)
+  item.testing = true
+  console.log('项目加载失败', props.order, item)
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -290,11 +297,8 @@ async function loaded(event?: any) {
     setStatus(ItemStatus.NONE)
     await item.updateHeight()
     item.loaded = true
-
-    // 如果高度有问题，单独处理
     if (!item.height || item.heightError) {
-      console.log('item', item)
-      console.warn('load 项目高度异常，但仍标记为已加载')
+      console.warn('load 项目高度异常，但仍标记为已加载', item.height, item) // 如果高度有问题，单独处理
     }
     return
   }
@@ -362,6 +366,7 @@ async function updateHeight(flag = false) {
     // 查询 DOM 元素的边界信息，获取实际高度
     const rect = await getRect(`.${itemId}`, false, instance?.proxy)
     const rectHeight = rect?.height
+    console.warn('rectHeight', rectHeight, item)
     if (!rectHeight || rectHeight === 0) {
       item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
       item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
