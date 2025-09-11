@@ -356,7 +356,10 @@ async function onPlaceholderError() {
 async function updateHeight(flag = false) {
   try {
     // 如果父级排版中断，停止获取dom信息, 还有bug，暂时不加这个优化
-    // if (context.isLayoutInterrupted) return
+    // #ifdef MP-ALIPAY
+    console.log('context.isLayoutInterrupted', context.isLayoutInterrupted)
+    if (context.isLayoutInterrupted) return
+    // #endif
     await nextTick() // 很重要不然会导致获取高度错误
     // #ifdef MP-WEIXIN || MP-ALIPAY
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -368,10 +371,15 @@ async function updateHeight(flag = false) {
     if (!rectHeight || rectHeight === 0) {
       item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
       item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
+      console.warn('高度异常-a heightError', item.heightError, item)
     } else {
       // 纯图片加载加载失败，图片容器可能也是240
       item.height = rectHeight
       item.heightError = false
+    }
+    // 移除已处理的项目
+    if (flag) {
+      item.loaded = true
     }
   } catch (error) {
     // 查询失败时静默处理，避免报错
@@ -380,7 +388,6 @@ async function updateHeight(flag = false) {
     item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
     // console.log('error-item', item)
     // void 0
-  } finally {
     // 移除已处理的项目
     if (flag) {
       item.loaded = true

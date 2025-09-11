@@ -419,12 +419,12 @@ async function processQueue() {
       if (!item.loaded) {
         await waitItemLoaded(item)
       }
-      console.log('item-waitItemLoaded2', item.loaded, item)
 
       if (!isActive.value) {
         setTimeout(() => {
           pendingItems.forEach((item) => {
             item.loaded = false
+            item.heightError = false
           })
           // 页面失活，兜底清理
           liveTasks.forEach(({ reject, stop }) => {
@@ -434,7 +434,6 @@ async function processQueue() {
           liveTasks.clear()
         }, 0)
         console.log('item-waitItemLoaded3', item.loaded, item)
-
         return
       }
 
@@ -588,25 +587,45 @@ watch(
         // pendingItems.forEach((item) => {
 
         // })
+        // #ifdef MP-ALIPAY
+        const promise = []
+        // #endif
         for (let i = 0; i < pendingItems.length; i++) {
-          // #ifdef MP-WEIXIN || MP-ALIPAY
+          // #ifdef MP-ALIPAY
+          // 这里不应该执行updateHeight(true)才对呀,为什么可以？
+          promise.push(pendingItems[i].updateHeight(true))
+          // #endif
+          // #ifdef MP-WEIXIN
           pendingItems[i].updateHeight(true)
           // #endif
           // #ifndef MP-WEIXIN || MP-ALIPAY
           pendingItems[i].refreshImage()
           // #endif
         }
+        // #ifdef MP-ALIPAY
+        console.log('promise', promise)
+        Promise.all(promise).then(() => {
+          setTimeout(() => {
+            // 这里很重要，必要要包裹在setTimeout中
+            processQueue()
+          }, 0)
+        })
+        // #endif
+        // #ifndef MP-ALIPAY
         setTimeout(() => {
           // 这里很重要，必要要包裹在setTimeout中
           processQueue()
         }, 0)
+        // #endif
       }) // 延迟执行，确保页面完全激活
     }
     // 🔥 关键：页面失活时兜底清理
     if (!newActive && oldActive) {
+      isLayoutInterrupted.value = true
       setTimeout(() => {
         pendingItems.forEach((item) => {
           item.loaded = false
+          item.heightError = false
         })
         // 页面失活，兜底清理
         liveTasks.forEach(({ reject, stop }) => {
