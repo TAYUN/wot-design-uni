@@ -21,7 +21,7 @@ const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, tim
 async function fetchApi(page: number) {
   await sleep(300)
   const getList = () =>
-    Array(4)
+    Array(10)
       .fill(0)
       .map((_, i) => {
         return {
@@ -185,7 +185,7 @@ function clearAll() {
           <view class="waterfall-item">
             <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
             <view class="delete-button">
-              <wd-button size="large" type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
+              <wd-button type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
             </view>
           </view>
         </template>
