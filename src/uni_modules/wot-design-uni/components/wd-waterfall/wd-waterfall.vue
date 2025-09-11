@@ -332,8 +332,6 @@ const liveTasks = new Map<
 >()
 
 async function waitItemLoaded(item: WaterfallItemInfo) {
-  if (item.loaded) return
-
   const key = item
   if (liveTasks.has(key)) {
     // 复用旧 Promise
@@ -348,7 +346,6 @@ async function waitItemLoaded(item: WaterfallItemInfo) {
     const stop = watch(
       () => item.loaded,
       (v) => {
-        console.log('item.loaded', item.loaded, item, pendingItems)
         if (v) {
           stop()
           liveTasks.delete(key)
@@ -419,19 +416,28 @@ async function processQueue() {
     while (pendingItems.length > 0) {
       const item = pendingItems[0] // 取队列第一个项目
       // 检查项目是否已加载
-      await waitItemLoaded(item)
+      if (!item.loaded) {
+        await waitItemLoaded(item)
+      }
+      console.log('item-waitItemLoaded2', item.loaded, item)
 
       if (!isActive.value) {
         setTimeout(() => {
-          // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
+          pendingItems.forEach((item) => {
+            item.loaded = false
+          })
+          // 页面失活，兜底清理
           liveTasks.forEach(({ reject, stop }) => {
             reject(new Error('页面失活，排版中断，错误码1001'))
             stop()
           })
           liveTasks.clear()
         }, 0)
+        console.log('item-waitItemLoaded3', item.loaded, item)
+
         return
       }
+
       if (item.heightError) {
         setTimeout(() => {
           // 页面不可见，统一清理 watch 和 拒绝 promise 兜底清理：全部 reject + stop
@@ -441,6 +447,7 @@ async function processQueue() {
           })
           liveTasks.clear()
         }, 0)
+        console.log('item-waitItemLoaded4 heightError', item.heightError, item)
         return
       }
 
@@ -458,12 +465,11 @@ async function processQueue() {
         const newHeight = item.top + item.height
         columns[targetColumnIndex].height = newHeight
       }
-      console.log('processQueue', item.height)
 
       // 设置可见状态
       item.visible = true
       if (item.testing) {
-        console.log('异常的item', item)
+        // console.log('异常的item', item)
       }
       // 从队列中移除已排版的项目
       containerHeight.value = Math.max(...columns.map((col) => col.height), 0)
@@ -579,14 +585,17 @@ watch(
       // 必须要用 nextTick
       nextTick(() => {
         console.log('重新触发排版---', pendingItems)
-        pendingItems.forEach((item) => {
+        // pendingItems.forEach((item) => {
+
+        // })
+        for (let i = 0; i < pendingItems.length; i++) {
           // #ifdef MP-WEIXIN || MP-ALIPAY
-          item.updateHeight(true)
+          pendingItems[i].updateHeight(true)
           // #endif
           // #ifndef MP-WEIXIN || MP-ALIPAY
-          item.refreshImage()
+          pendingItems[i].refreshImage()
           // #endif
-        })
+        }
         setTimeout(() => {
           // 这里很重要，必要要包裹在setTimeout中
           processQueue()
@@ -596,6 +605,9 @@ watch(
     // 🔥 关键：页面失活时兜底清理
     if (!newActive && oldActive) {
       setTimeout(() => {
+        pendingItems.forEach((item) => {
+          item.loaded = false
+        })
         // 页面失活，兜底清理
         liveTasks.forEach(({ reject, stop }) => {
           reject(new Error('页面失活，排版中断，错误码1000'))

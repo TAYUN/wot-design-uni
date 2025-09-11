@@ -263,11 +263,9 @@ async function handleFailureFinal() {
   // 微信小程序不支持重试，直接进入失败状态
   setStatus(ItemStatus.FAIL, '原始内容加载失败')
   await item.updateHeight()
-  setTimeout(() => {
-    item.loaded = true
-  }, 0)
+  item.loaded = true
   item.testing = true
-  console.log('项目加载失败', props.order, item)
+  // console.log('项目加载失败', props.order, item)
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -298,7 +296,7 @@ async function loaded(event?: any) {
     await item.updateHeight()
     item.loaded = true
     if (!item.height || item.heightError) {
-      console.warn('load 项目高度异常，但仍标记为已加载', item.height, item) // 如果高度有问题，单独处理
+      console.warn('高度异常-b，但仍标记为已加载', item.height, item) // 如果高度有问题，单独处理
     }
     return
   }
@@ -357,8 +355,8 @@ async function onPlaceholderError() {
 
 async function updateHeight(flag = false) {
   try {
-    // 如果父级排版中断，停止获取dom信息
-    if (context.isLayoutInterrupted) return
+    // 如果父级排版中断，停止获取dom信息, 还有bug，暂时不加这个优化
+    // if (context.isLayoutInterrupted) return
     await nextTick() // 很重要不然会导致获取高度错误
     // #ifdef MP-WEIXIN || MP-ALIPAY
     await new Promise((resolve) => setTimeout(resolve, 100))
@@ -366,17 +364,20 @@ async function updateHeight(flag = false) {
     // 查询 DOM 元素的边界信息，获取实际高度
     const rect = await getRect(`.${itemId}`, false, instance?.proxy)
     const rectHeight = rect?.height
-    console.warn('rectHeight', rectHeight, item)
+
     if (!rectHeight || rectHeight === 0) {
       item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
       item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
     } else {
       // 纯图片加载加载失败，图片容器可能也是240
       item.height = rectHeight
+      item.heightError = false
     }
   } catch (error) {
     // 查询失败时静默处理，避免报错
     console.error(`error高度获取失败，${item}`, error)
+    item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
+    item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
     // console.log('error-item', item)
     // void 0
   } finally {
