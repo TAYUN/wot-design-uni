@@ -697,10 +697,16 @@ defineExpose<WaterfallExpose>({
 </script>
 
 <template>
-  <!-- 瀑布流容器：动态高度，包含所有瀑布流项目 -->
-  <view :class="[containerId, customClass]" :style="[customStyle, { height: containerHeight + 'px' }]">
-    <slot />
+  <!-- #ifdef MP-DINGTALK -->
+  <view>
+    <!-- #endif -->
+    <!-- 瀑布流容器：动态高度，包含所有瀑布流项目 -->
+    <view :class="[containerId, customClass]" :style="[customStyle, { height: containerHeight + 'px' }]">
+      <slot />
+    </view>
+    <!-- #ifdef MP-DINGTALK -->
   </view>
+  <!-- #endif -->
 </template>
 
 <style lang="scss" scoped>

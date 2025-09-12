@@ -486,13 +486,19 @@ defineExpose<WaterfallItemExpose>({})
 </script>
 
 <template>
-  <!-- 瀑布流项目容器：绝对定位，通过 transform 控制位置 -->
-  <view
-    :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible, 'is-reflowing': context.isReflowing }]"
-    :style="[waterfallItemStyle, customStyle]"
-  >
-    <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
+  <!-- #ifdef MP-DINGTALK -->
+  <view>
+    <!-- #endif -->
+    <!-- 瀑布流项目容器：绝对定位，通过 transform 控制位置 -->
+    <view
+      :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible, 'is-reflowing': context.isReflowing }]"
+      :style="[waterfallItemStyle, customStyle]"
+    >
+      <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
+    </view>
+    <!-- #ifdef MP-DINGTALK -->
   </view>
+  <!-- #endif -->
 </template>
 
 <style lang="scss" scoped>
