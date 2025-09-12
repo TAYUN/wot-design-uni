@@ -235,13 +235,11 @@ function addItem(item: WaterfallItemInfo) {
  */
 async function removeItem(item: WaterfallItemInfo) {
   // 将项目加入删除队列，等待排版队列为空时执行
-  if (items.includes(item) && !pendingRemovalItems.includes(item)) {
-    pendingRemovalItems.push(item)
+  pendingRemovalItems.push(item)
 
-    // 如果当前没有待排版项目，立即处理删除队列
-    if (pendingItems.length === 0) {
-      processPendingRemovals()
-    }
+  // 如果当前没有待排版项目，立即处理删除队列
+  if (pendingItems.length === 0) {
+    processPendingRemovals()
   }
 }
 
@@ -250,7 +248,9 @@ async function removeItem(item: WaterfallItemInfo) {
  * 批量执行删除操作并重新计算布局
  */
 function processPendingRemovals() {
-  if (pendingRemovalItems.length === 0) return
+  if (pendingRemovalItems.length === 0 || removalProcessing) return
+
+  removalProcessing = true
 
   // 批量删除所有待删除项目
   pendingRemovalItems.forEach((item) => {
@@ -262,19 +262,20 @@ function processPendingRemovals() {
 
   // 清空删除队列
   pendingRemovalItems.length = 0
-
   // 重新计算布局
   recalculateItemsAfterRemoval()
 }
 
 /**
- * 删除项目后重新计算剩余项目位置的优化算法
+ * 删除项目后重新计算剩余项目位置的待优化，增量重排
  */
 function recalculateItemsAfterRemoval() {
   if (items.length === 0) {
     // 如果没有剩余项目，重置容器高度和列高度
     containerHeight.value = 0
     initColumns()
+    // 释放删除锁
+    removalProcessing = false
     return
   }
 
@@ -310,7 +311,15 @@ function recalculateItemsAfterRemoval() {
   const newContainerHeight = Math.max(...columns.map((col) => col.height), 0)
   containerHeight.value = newContainerHeight
   // 触发重排完成事件
-  updateLoadStatus()
+  // updateLoadStatus()
+
+  // 释放删除锁
+  removalProcessing = false
+
+  // 检查是否有待处理的排版队列
+  if (pendingItems.length > 0) {
+    processQueue()
+  }
 }
 
 /**
@@ -401,13 +410,18 @@ function fullReflowAfterInsert() {
 let queueProcessing = false
 
 /**
+ * 删除处理状态
+ */
+let removalProcessing = false
+
+/**
  * 处理排版队列
  * 从 pendingItems 队列中取出项目进行排版
  */
 
 async function processQueue() {
   try {
-    if (queueProcessing) return
+    if (queueProcessing || removalProcessing) return
     queueProcessing = true
     updateLoadStatus()
     if (pendingItems.length === 0) return
@@ -433,7 +447,6 @@ async function processQueue() {
           })
           liveTasks.clear()
         }, 0)
-        console.log('item-waitItemLoaded3', item.loaded, item)
         return
       }
 
@@ -446,7 +459,6 @@ async function processQueue() {
           })
           liveTasks.clear()
         }, 0)
-        console.log('item-waitItemLoaded4 heightError', item.heightError, item)
         return
       }
 
@@ -467,9 +479,6 @@ async function processQueue() {
 
       // 设置可见状态
       item.visible = true
-      if (item.testing) {
-        // console.log('异常的item', item)
-      }
       // 从队列中移除已排版的项目
       containerHeight.value = Math.max(...columns.map((col) => col.height), 0)
       pendingItems.shift()
@@ -477,27 +486,25 @@ async function processQueue() {
 
     // 计算容器总高度（取最高列的高度）
 
-    // 所有项目处理完成后，清除全局重排状态
-    if (pendingItems.length === 0) {
-      isReflowing.value = false
-
-      // 处理待删除项目队列
-      if (pendingRemovalItems.length > 0) {
-        processPendingRemovals()
-      }
-    }
-
     // 全部排完后，兜底清理残余 watch
     liveTasks.forEach(({ reject, stop }) => {
       reject(new Error('未知错误，排版中断，错误码1003'))
       stop()
     })
     liveTasks.clear()
-
+    // 所有项目处理完成后，清除全局重排状态
+    if (pendingItems.length === 0) {
+      isReflowing.value = false
+    }
     // 更新加载状态
     updateLoadStatus()
+    setTimeout(() => {
+      // 处理待删除项目队列
+      if (pendingRemovalItems.length > 0) {
+        processPendingRemovals()
+      }
+    }, 0)
   } catch (error) {
-    // 如果是删除操作的中断，不设置 isLayoutInterrupted
     isLayoutInterrupted.value = true
     console.error('error', error)
     // console.log('pendingItems', pendingItems)
@@ -584,9 +591,7 @@ watch(
       // 必须要用 nextTick
       nextTick(() => {
         console.log('重新触发排版---', pendingItems)
-        // pendingItems.forEach((item) => {
-
-        // })
+        // pendingItems.forEach((item) => {})
         // #ifdef MP-ALIPAY
         const promise = []
         // #endif
@@ -606,14 +611,12 @@ watch(
         console.log('promise', promise)
         Promise.all(promise).then(() => {
           setTimeout(() => {
-            // 这里很重要，必要要包裹在setTimeout中
             processQueue()
           }, 0)
         })
         // #endif
         // #ifndef MP-ALIPAY
         setTimeout(() => {
-          // 这里很重要，必要要包裹在setTimeout中
           processQueue()
         }, 0)
         // #endif
@@ -695,7 +698,7 @@ defineExpose<WaterfallExpose>({
 
 <template>
   <!-- 瀑布流容器：动态高度，包含所有瀑布流项目 -->
-  <view :class="`wd-waterfall ${containerId} ${customClass}`" :style="[customStyle, { height: containerHeight + 'px' }]">
+  <view :class="[containerId, customClass]" :style="[customStyle, { height: containerHeight + 'px' }]">
     <slot />
   </view>
 </template>
