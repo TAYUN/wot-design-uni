@@ -112,7 +112,7 @@ if (!context) {
   throw new Error('[wd-waterfall-item] 缺少瀑布流上下文，请确保组件仅在 <wd-waterfall> 内使用。')
 }
 // 生成唯一的项目ID，用于DOM查询
-const itemId = `wd-item-${uuid()}`
+const itemId = `wd-waterfall-item-${uuid()}`
 const slotId = ref(uuid())
 
 const currWidth = ref(props.width || 320)
@@ -167,7 +167,6 @@ const instance = getCurrentInstance()
  * 包含项目的所有状态信息，会被父组件用于布局计算
  */
 const item = shallowReactive<WaterfallItemInfo>({
-  id: uuid(),
   loaded: false, // 是否加载完成（图片等资源）
   height: 0, // 项目高度（DOM 实际高度）
   loadSuccess: false, // 是否加载成功
@@ -264,8 +263,6 @@ async function handleFailureFinal() {
   setStatus(ItemStatus.FAIL, '原始内容加载失败')
   await item.updateHeight()
   item.loaded = true
-  item.testing = true
-  // console.log('项目加载失败', props.order, item)
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -357,7 +354,6 @@ async function updateHeight(flag = false) {
   try {
     // 如果父级排版中断，停止获取dom信息, 还有bug，暂时不加这个优化
     // #ifdef MP-ALIPAY
-    console.log('context.isLayoutInterrupted', context.isLayoutInterrupted)
     if (context.isLayoutInterrupted) return
     // #endif
     await nextTick() // 很重要不然会导致获取高度错误
@@ -492,7 +488,7 @@ defineExpose<WaterfallItemExpose>({})
 <template>
   <!-- 瀑布流项目容器：绝对定位，通过 transform 控制位置 -->
   <view
-    :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible || context.isReflowing, 'is-reflowing': context.isReflowing }]"
+    :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible, 'is-reflowing': context.isReflowing }]"
     :style="[waterfallItemStyle, customStyle]"
   >
     <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
