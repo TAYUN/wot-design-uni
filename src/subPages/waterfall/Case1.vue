@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 
 import NavTab from './components/NavTab.vue'
 import { mockImages } from './utils/mock'
 import { type WaterfallExpose } from '@/uni_modules/wot-design-uni/components/wd-waterfall/types'
-import { watch } from 'vue'
 
 // api
 interface ListItem {
@@ -108,7 +107,6 @@ onMounted(() => {
 // 删除
 function onDelete(item: ListItem, index: number) {
   list.value.splice(list.value.indexOf(item), 1)
-  console.log('删除', index)
 }
 
 // 头部插入
@@ -179,7 +177,7 @@ function clearAll() {
       <wd-button size="small" @click="insertBatch">批量插入</wd-button>
       <wd-button size="small" @click="clearAll">清空数据</wd-button>
     </view>
-    <wd-waterfall ref="waterfallRef" class="waterfall-container" error-mode="fallback">
+    <wd-waterfall ref="waterfallRef" custom-class="waterfall-container" error-mode="fallback">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
         <template v-slot:default="{ loaded }">
           <view class="waterfall-item">
