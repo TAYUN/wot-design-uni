@@ -17,7 +17,6 @@ export default {
  * 2. 自动获取内容高度并报告给父组件
  * 3. 根据父组件计算的位置进行定位
  * 4. 提供加载完成回调给内容组件
- * 5. 支持平滑的显示动画效果
  */
 import {
   computed,
@@ -34,18 +33,21 @@ import {
   toRef,
   type Ref
 } from 'vue'
-import { getRect, objToStyle, uuid } from '../common/util'
-import type { WaterfallItemExpose, WaterfallItemInfo, WaterfallItemProps, WaterfallItemSlots } from './types'
+import { getRect, uuid } from '../common/util'
+import type { WaterfallItemInfo, WaterfallItemProps } from './types'
 import { waterfallContextKey } from '../wd-waterfall/types'
 
 // 组件属性定义
 const props = withDefaults(defineProps<WaterfallItemProps>(), {})
 
-// 事件定义
+// // 事件定义
 // defineEmits<WaterfallItemEmits>()
 
 // 插槽定义
-defineSlots<WaterfallItemSlots>()
+// defineSlots<WaterfallItemSlots>()
+
+// 暴露给父组件的方法和属性
+// defineExpose<WaterfallItemExpose>({})
 
 // ==================== 内联工具函数 ====================
 
@@ -134,7 +136,7 @@ const ItemStatus = {
 
 type ItemStatusType = (typeof ItemStatus)[keyof typeof ItemStatus]
 
-// 单一真相源：错误状态
+// 错误状态
 const errorState = shallowReactive({
   status: ItemStatus.NONE as ItemStatusType,
   message: ''
@@ -146,7 +148,6 @@ function setStatus(status: ItemStatusType, message = '') {
   errorState.message = message
 }
 
-// 语义化的 errorInfo slot 结构
 const errorInfo = computed(() => ({
   status: errorState.status,
   message: errorState.message,
@@ -168,14 +169,14 @@ const instance = getCurrentInstance()
  */
 const item = shallowReactive<WaterfallItemInfo>({
   loaded: false, // 是否加载完成（图片等资源）
-  height: 0, // 项目高度（DOM 实际高度）
   loadSuccess: false, // 是否加载成功
-  top: 0, // 垂直位置（由父组件计算）
-  left: 0, // 水平位置（由父组件计算）
   visible: false, // 是否可见（由父组件控制）
   isInserted: false, // 是否插入项目
+  height: 0, // 项目高度（DOM 实际高度）
+  top: 0, // 垂直位置（由父组件计算）
+  left: 0, // 水平位置（由父组件计算）
   heightError: false, // 是否高度异常
-  order: toRef(props, 'order') as Ref<number>, // 使用类型断言确保类型为 Ref<number>
+  order: toRef(props, 'order') as Ref<number>, //用于插入控制项目顺序
   updateHeight,
   refreshImage
 })
@@ -420,7 +421,6 @@ onMounted(async () => {
       onLoadKnownSize()
     }, 16)
   }
-  // 只有在 fallback 模式下才启动超时计时器
   if (context?.maxWait) {
     startTimeout()
   }
@@ -460,33 +460,20 @@ watch(
  */
 const waterfallItemStyle = computed(() => {
   return {
-    // 宽度：使用父组件计算的列宽
     width: `${context.columnWidth}px`,
-    // 高度
-    // paddingTop: props?.width && props?.height ? paddingTop.value : '0',
-    // 位置：使用 3D 变换进行定位（性能更好）
     transform: `translate3d(${item.left}px,${item.top}px,0px)`,
-
     // 过渡动画：根据延迟状态决定是否包含 transform 动画
     transition: laterVisible.value
       ? 'opacity var(--wd-waterfall-duration) ease-out,transform var(--wd-waterfall-duration) ease-out' // 包含位置动画，使用缓出效果
       : 'opacity var(--wd-waterfall-duration) ease-out' // 仅包含透明度动画
   }
 })
-// ==================== 组件暴露接口 ====================
-
-/**
- * 暴露给父组件的方法和属性
- * 当前为空，可根据需要扩展
- */
-defineExpose<WaterfallItemExpose>({})
 </script>
 
 <template>
   <!-- #ifdef MP-DINGTALK -->
   <view>
     <!-- #endif -->
-    <!-- 瀑布流项目容器：绝对定位，通过 transform 控制位置 -->
     <view
       :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible, 'is-reflowing': context.isReflowing }]"
       :style="[waterfallItemStyle, customStyle]"

@@ -92,7 +92,6 @@ onMounted(async () => {
  * - 'idle': 空闲状态，所有项目都已加载完成
  * - 'busy': 忙碌状态，有项目正在加载中
  */
-// let loadStatus.value: 'idle' | 'busy' = 'idle'
 const loadStatus = ref<'idle' | 'busy'>('idle')
 
 /**
@@ -154,7 +153,6 @@ const pendingRemovalItems: WaterfallItemInfo[] = []
 /**
  * 列高度状态管理
  * 直接维护每列的当前高度，避免重复计算
- * 使用 reactive 确保对象内部属性变化能触发响应式更新
  */
 const columns = reactive<{ colIndex: number; height: number }[]>([])
 
@@ -191,8 +189,6 @@ function initColumns() {
  * 不使用计算属性，确保每次都能获取到最新的列状态
  */
 function getMinColumn() {
-  // if (columns.length === 0) return null
-
   let min = columns[0]
   for (let i = 1; i < columns.length; i++) {
     if (columns[i].height < min.height) {
@@ -310,8 +306,6 @@ function recalculateItemsAfterRemoval() {
   // 更新容器总高度
   const newContainerHeight = Math.max(...columns.map((col) => col.height), 0)
   containerHeight.value = newContainerHeight
-  // 触发重排完成事件
-  // updateLoadStatus()
 
   // 释放删除锁
   removalProcessing = false
@@ -330,7 +324,6 @@ function onItemLoad(item: WaterfallItemInfo) {
   void item.height
 }
 
-// 任何组件都能 import 的模块
 const liveTasks = new Map<
   WaterfallItemInfo /* item.id */,
   {
@@ -464,7 +457,6 @@ async function processQueue() {
 
       // 检查是否为插入项目（使用addItem中设置的标记）
       if (item.isInserted) {
-        // 6. 插入后进行全重排（类似删除后的处理）
         fullReflowAfterInsert()
       } else {
         // 正常追加项目的处理逻辑
@@ -476,16 +468,11 @@ async function processQueue() {
         const newHeight = item.top + item.height
         columns[targetColumnIndex].height = newHeight
       }
-
       // 设置可见状态
       item.visible = true
-      // 从队列中移除已排版的项目
       containerHeight.value = Math.max(...columns.map((col) => col.height), 0)
       pendingItems.shift()
     }
-
-    // 计算容器总高度（取最高列的高度）
-
     // 全部排完后，兜底清理残余 watch
     liveTasks.forEach(({ reject, stop }) => {
       reject(new Error('未知错误，排版中断，错误码1003'))
@@ -559,12 +546,6 @@ async function refreshReflow() {
   // 如果是刷新数据，items要重置
   items.length = 0
 }
-
-/**
- * 增量重排函数
- * 仅处理当前待排版队列中的项目
- * 主要用于: 页面隐藏，需要增量重排
- */
 
 // ==================== 响应式监听 ====================
 
