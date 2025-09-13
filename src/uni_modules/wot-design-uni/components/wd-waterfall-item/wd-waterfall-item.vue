@@ -397,7 +397,6 @@ async function refreshImage(isReset = true) {
   item.loaded = false
   item.loadSuccess = false
   item.heightError = false
-  // setStatus(ItemStatus.NONE) // 为什么要设置这个
   slotId.value = uuid()
 
   // 重新启动超时计时器 todo 这里应该打开吗？需要使用参数控制是否重新启动定时器吗？
