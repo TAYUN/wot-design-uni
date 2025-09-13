@@ -286,9 +286,7 @@ async function loaded(event?: any) {
   if (overtime) return // 已超时，忽略后续加载事件
   item.loadSuccess = event?.type === 'load' || event?.type === 'onLoad'
 
-  // 检查是否加载成功
   if (item.loadSuccess) {
-    // 加载成功：更新高度并完成
     setStatus(ItemStatus.NONE)
     await item.updateHeight()
     item.loaded = true
@@ -352,13 +350,10 @@ async function onPlaceholderError() {
 
 async function updateHeight(flag = false) {
   try {
-    // 如果父级排版中断，停止获取dom信息, 还有bug，暂时不加这个优化
-    // #ifdef MP-ALIPAY
     if (context.isLayoutInterrupted) return
-    // #endif
     await nextTick() // 很重要不然会导致获取高度错误
-    // #ifdef MP-WEIXIN || MP-ALIPAY
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    // #ifdef MP-WEIXIN || MP-ALIPAY || APP-PLUS
+    await new Promise((resolve) => setTimeout(resolve, 200))
     // #endif
     // 查询 DOM 元素的边界信息，获取实际高度
     const rect = await getRect(`.${itemId}`, false, instance?.proxy)
@@ -372,6 +367,9 @@ async function updateHeight(flag = false) {
       // 纯图片加载加载失败，图片容器可能也是240
       item.height = rectHeight
       item.heightError = false
+      // if (rectHeight === 240) {
+      //   console.warn('240高度可能是异常 heightError', item)
+      // }
     }
     // 移除已处理的项目
     if (flag) {
@@ -382,7 +380,6 @@ async function updateHeight(flag = false) {
     console.error(`error高度获取失败，${item}`, error)
     item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
     item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
-    // console.log('error-item', item)
     // void 0
     // 移除已处理的项目
     if (flag) {
