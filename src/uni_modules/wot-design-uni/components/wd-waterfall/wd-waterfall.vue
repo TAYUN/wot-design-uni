@@ -507,7 +507,6 @@ async function processQueue() {
   } catch (error) {
     isLayoutInterrupted.value = true
     console.error('error', error)
-    // console.log('pendingItems', pendingItems)
   } finally {
     queueProcessing = false
   }
@@ -590,7 +589,6 @@ watch(
       isLayoutInterrupted.value = false // 重置中断信号
       // 必须要用 nextTick
       nextTick(() => {
-        console.log('重新触发排版---', pendingItems)
         // pendingItems.forEach((item) => {})
         // #ifdef MP-ALIPAY
         const promise = []
@@ -600,15 +598,14 @@ watch(
           // 这里不应该执行updateHeight(true)才对呀,为什么可以？
           promise.push(pendingItems[i].updateHeight(true))
           // #endif
-          // #ifdef MP-WEIXIN
+          // #ifndef WEB || MP-ALIPAY
           pendingItems[i].updateHeight(true)
           // #endif
-          // #ifndef MP-WEIXIN || MP-ALIPAY
+          // #ifdef WEB || APP-PLUS
           pendingItems[i].refreshImage()
           // #endif
         }
         // #ifdef MP-ALIPAY
-        console.log('promise', promise)
         Promise.all(promise).then(() => {
           setTimeout(() => {
             processQueue()
@@ -637,7 +634,6 @@ watch(
         })
         liveTasks.clear()
       }, 0)
-      console.log('pendingItems', pendingItems)
     }
   },
   {
