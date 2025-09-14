@@ -493,7 +493,7 @@ async function processQueue() {
     }, 0)
   } catch (error) {
     isLayoutInterrupted.value = true
-    console.error('error', error)
+    // console.error('error', error)
   } finally {
     queueProcessing = false
   }

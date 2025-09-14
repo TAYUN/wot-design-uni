@@ -214,9 +214,9 @@ async function onLoadKnownSize() {
   await item.updateHeight()
   item.loaded = true
   // 如果高度有问题，单独处理
-  if (!item.height || item.heightError) {
-    console.warn('已知高度-项目高度异常，但仍标记为已加载')
-  }
+  // if (!item.height || item.heightError) {
+  //   console.warn('已知高度-项目高度异常，但仍标记为已加载')
+  // }
   // todo 如果已知高度也加载失败了呢
 }
 // 模式1：默认模式 - 失败就结束
@@ -291,9 +291,9 @@ async function loaded(event?: any) {
     setStatus(ItemStatus.NONE)
     await item.updateHeight()
     item.loaded = true
-    if (!item.height || item.heightError) {
-      console.warn('高度异常-b，但仍标记为已加载', item.height, item) // 如果高度有问题，单独处理
-    }
+    // if (!item.height || item.heightError) {
+    //   console.warn('高度异常-b，但仍标记为已加载', item.height, item) // 如果高度有问题，单独处理
+    // }
     return
   }
 
@@ -363,7 +363,7 @@ async function updateHeight(flag = false) {
     if (!rectHeight || rectHeight === 0) {
       item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
       item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
-      console.warn('高度异常-a heightError', item.heightError, item)
+      // console.warn('高度异常-a heightError', item.heightError, item)
     } else {
       // 纯图片加载加载失败，图片容器可能也是240
       item.height = rectHeight
@@ -378,10 +378,10 @@ async function updateHeight(flag = false) {
     }
   } catch (error) {
     // 查询失败时静默处理，避免报错
-    console.error(`error高度获取失败，${item}`, error)
+    // console.error(`error高度获取失败，${item}`, error)
     item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
     item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
-    // void 0
+    // void error
     // 移除已处理的项目
     if (flag) {
       item.loaded = true
