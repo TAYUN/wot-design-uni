@@ -351,7 +351,7 @@ async function onPlaceholderError() {
 
 async function updateHeight(flag = false) {
   try {
-    if (context.isLayoutInterrupted) return
+    // if (context.isLayoutInterrupted) return
     await nextTick() // 很重要不然会导致获取高度错误
     // #ifdef MP-WEIXIN || MP-ALIPAY || APP-PLUS
     await new Promise((resolve) => setTimeout(resolve, 200))
