@@ -1,22 +1,34 @@
 <script lang="ts" setup>
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
-import { nextTick, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import NavTab from './components/NavTab.vue'
-import { mockImages } from './utils/mock'
+import { mockImages, random, text } from './utils/mock'
 import { type WaterfallExpose } from '@/uni_modules/wot-design-uni/components/wd-waterfall/types'
 
 // api
 interface ListItem {
   id: number
+  title: string
   url: string
 }
 
 const currentPage = ref(1)
 const list = ref<ListItem[]>([])
+const placeholderSrc = 'https://wot-ui.cn/logo.png'
 
 let uuid = 1
 const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
+
+// 生成随机title的函数
+const generateTitle = () => {
+  const min = 5
+  const max = 30
+  const startIndex = random(0, text.length - max)
+  const length = random(min, max)
+  return text.slice(startIndex, startIndex + length)
+}
+
 async function fetchApi(page: number) {
   await sleep(300)
   const getList = () =>
@@ -25,6 +37,7 @@ async function fetchApi(page: number) {
       .map((_, i) => {
         return {
           id: uuid++,
+          title: generateTitle(),
           url: mockImages[i % mockImages.length]
         }
       })
@@ -105,7 +118,7 @@ onMounted(() => {
 })
 
 // 删除
-function onDelete(item: ListItem, index: number) {
+function onDelete(item: ListItem) {
   list.value.splice(list.value.indexOf(item), 1)
 }
 
@@ -113,6 +126,7 @@ function onDelete(item: ListItem, index: number) {
 function insertAtBeginning() {
   const newItem: ListItem = {
     id: uuid++,
+    title: generateTitle(),
     url: mockImages[Math.floor(Math.random() * mockImages.length)]
   }
   list.value.unshift(newItem)
@@ -122,6 +136,7 @@ function insertAtBeginning() {
 function insertAtMiddle() {
   const newItem: ListItem = {
     id: uuid++,
+    title: generateTitle(),
     url: mockImages[Math.floor(Math.random() * mockImages.length)]
   }
   const middleIndex = Math.floor(list.value.length / 2)
@@ -132,6 +147,7 @@ function insertAtMiddle() {
 function insertAtEnd() {
   const newItem: ListItem = {
     id: uuid++,
+    title: generateTitle(),
     url: mockImages[Math.floor(Math.random() * mockImages.length)]
   }
   list.value.push(newItem)
@@ -141,22 +157,27 @@ function insertAtEnd() {
 function insertRandom() {
   const newItem: ListItem = {
     id: uuid++,
+    title: generateTitle(),
     url: mockImages[Math.floor(Math.random() * mockImages.length)]
   }
   const randomIndex = Math.floor(Math.random() * (list.value.length + 1))
   list.value.splice(randomIndex, 0, newItem)
 }
 
-// 批量插入
+// 批量随机插入
 function insertBatch() {
   const batchSize = 5
   const newItems: ListItem[] = Array(batchSize)
     .fill(0)
     .map(() => ({
       id: uuid++,
+      title: generateTitle(),
       url: mockImages[Math.floor(Math.random() * mockImages.length)]
     }))
-  list.value.push(...newItems)
+
+  // 随机插入位置
+  const randomIndex = Math.floor(Math.random() * (list.value.length + 1))
+  list.value.splice(randomIndex, 0, ...newItems)
 }
 
 // 清空数据
@@ -170,21 +191,33 @@ function clearAll() {
 <template>
   <view>
     <view class="button-row">
+      <!-- #ifdef WEB || APP-PLUS -->
       <wd-button size="small" @click="insertAtBeginning">头部插入</wd-button>
       <wd-button size="small" @click="insertAtMiddle">中间插入</wd-button>
-      <wd-button size="small" @click="insertAtEnd">尾部插入</wd-button>
       <wd-button size="small" @click="insertRandom">随机插入</wd-button>
       <wd-button size="small" @click="insertBatch">批量插入</wd-button>
+      <!-- #endif -->
+      <wd-button size="small" @click="insertAtEnd">添加数据</wd-button>
       <wd-button size="small" @click="clearAll">清空数据</wd-button>
     </view>
     <wd-waterfall ref="waterfallRef" custom-class="waterfall-container" error-strategy="retryHard">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
-        <template v-slot:default="{ loaded }">
+        <template #default="{ loaded, status, onPlaceholderLoad, onPlaceholderError, message }">
           <view class="waterfall-item">
-            <image mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
-            <view class="delete-button">
-              <wd-button type="error" @click="onDelete(item, index)">删除{{ index }}</wd-button>
+            <image v-if="status === 'success'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
+            <!-- 第二层：占位图片 -->
+            <view v-else-if="status === 'fail'" class="fallback-container">
+              <image :src="placeholderSrc" mode="aspectFill" class="fallback-image" @load="onPlaceholderLoad" @error="onPlaceholderError" />
             </view>
+            <!-- 第三层：最终兜底 -->
+            <view v-else class="final-fallback">
+              {{ message || '图片加载失败' }}
+            </view>
+
+            <view class="item-content">
+              {{ item.title }}
+            </view>
+            <wd-button type="error" block :round="false" @click="onDelete(item)">删除-{{ index }}</wd-button>
           </view>
         </template>
       </wd-waterfall-item>
@@ -204,6 +237,7 @@ function clearAll() {
 }
 
 .waterfall-item {
+  box-sizing: border-box;
   position: relative;
   overflow: hidden;
   border: 1px solid #d1d5db;
@@ -214,12 +248,6 @@ function clearAll() {
 
 .waterfall-image {
   width: 100%;
-}
-
-.delete-button {
-  position: absolute !important;
-  right: 0;
-  bottom: 0;
 }
 
 .button-row {
@@ -233,6 +261,34 @@ function clearAll() {
 
 .bottom-spacing {
   padding: 40px;
+}
+
+// 错误处理相关样式
+.fallback-container {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.fallback-image {
+  width: 100%;
+  height: 100%;
+}
+
+.final-fallback {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border: 1px dashed #ddd;
+}
+
+.item-content {
+  padding: 8px;
 }
 </style>
 
