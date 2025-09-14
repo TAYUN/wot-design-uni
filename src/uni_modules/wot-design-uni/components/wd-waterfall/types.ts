@@ -5,7 +5,7 @@ import { baseProps } from '../common/props'
 /**
  * 错误处理模式
  */
-export type ErrorMode = 'none' | 'placeholder' | 'retry' | 'fallback' | 'ignore'
+export type ErrorStrategy = 'default' | 'placeholder' | 'retry' | 'retryHard' | 'pass'
 /**
  * 瀑布流组件属性
  */
@@ -41,8 +41,8 @@ export const waterfallProps = {
   /**
    * 错误处理模式
    */
-  errorMode: {
-    type: String as () => ErrorMode,
+  errorStrategy: {
+    type: String as () => ErrorStrategy,
     default: 'none'
   },
   /**
@@ -70,7 +70,7 @@ export interface WaterfallProps {
   columnGap?: number
   rowGap?: number
   show?: boolean
-  errorMode?: ErrorMode
+  errorStrategy?: ErrorStrategy
   retryCount?: number
   maxWait?: number
   customClass?: string
@@ -85,7 +85,7 @@ export const defaultWaterfallProps: Partial<WaterfallProps> = {
   columnGap: 8,
   rowGap: 8,
   show: undefined,
-  errorMode: 'none',
+  errorStrategy: 'default',
   retryCount: 1
 }
 
@@ -170,7 +170,7 @@ export interface WaterfallContext {
   /**
    * 错误处理模式
    */
-  errorMode: ErrorMode
+  errorStrategy: ErrorStrategy
   /**
    * 重试次数
    */

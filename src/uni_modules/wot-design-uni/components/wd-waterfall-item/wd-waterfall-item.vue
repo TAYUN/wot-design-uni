@@ -34,7 +34,7 @@ import {
   type Ref
 } from 'vue'
 import { getRect, uuid } from '../common/util'
-import type { WaterfallItemInfo, WaterfallItemProps } from './types'
+import type { WaterfallItemExpose, WaterfallItemInfo, WaterfallItemProps, WaterfallItemSlots } from './types'
 import { waterfallContextKey } from '../wd-waterfall/types'
 
 // 组件属性定义
@@ -44,10 +44,10 @@ const props = withDefaults(defineProps<WaterfallItemProps>(), {})
 // defineEmits<WaterfallItemEmits>()
 
 // 插槽定义
-// defineSlots<WaterfallItemSlots>()
+defineSlots<WaterfallItemSlots>()
 
 // 暴露给父组件的方法和属性
-// defineExpose<WaterfallItemExpose>({})
+defineExpose<WaterfallItemExpose>({})
 
 // ==================== 内联工具函数 ====================
 
@@ -128,17 +128,17 @@ const FALLBACK_HEIGHT = 120 // 异常默认高度
 
 // 错误状态枚举
 const ItemStatus = {
-  NONE: 'none',
+  SUCCESS: 'success',
   FAIL: 'fail',
   TIMEOUT: 'timeout',
-  FINAL: 'final'
+  OVER: 'over'
 } as const
 
 type ItemStatusType = (typeof ItemStatus)[keyof typeof ItemStatus]
 
 // 错误状态
 const errorState = shallowReactive({
-  status: ItemStatus.NONE as ItemStatusType,
+  status: ItemStatus.SUCCESS as ItemStatusType,
   message: ''
 })
 
@@ -147,17 +147,6 @@ function setStatus(status: ItemStatusType, message = '') {
   errorState.status = status
   errorState.message = message
 }
-
-const errorInfo = computed(() => ({
-  status: errorState.status,
-  message: errorState.message,
-  placeholder: {
-    load: onPlaceholderLoad,
-    error: onPlaceholderError
-  }
-  // todo  单个加重试功能
-}))
-
 // ==================== 项目信息管理 ====================
 
 // 获取当前组件实例，用于DOM操作
@@ -187,8 +176,8 @@ const { start: startTimeout } = useTimeout(async () => {
   if (!item.loaded && !overtime) {
     overtime = true
     // 根据模式决定超时后的处理方式
-    switch (context.errorMode) {
-      case 'none':
+    switch (context.errorStrategy) {
+      case 'default':
         setStatus(ItemStatus.TIMEOUT, '加载超时')
         break
 
@@ -200,7 +189,7 @@ const { start: startTimeout } = useTimeout(async () => {
         setStatus(ItemStatus.TIMEOUT, '重试超时')
         break
 
-      case 'fallback':
+      case 'retryHard':
         setStatus(ItemStatus.TIMEOUT, '加载超时')
         break
     }
@@ -221,7 +210,7 @@ async function onLoadKnownSize() {
 }
 // 模式1：默认模式 - 失败就结束
 async function handleFailureNone() {
-  setStatus(ItemStatus.FINAL, '加载失败')
+  setStatus(ItemStatus.OVER, '加载失败')
   await item.updateHeight()
   item.loaded = true
 }
@@ -236,7 +225,7 @@ async function handleFailurePlaceholder() {
 async function handleFailureRetry() {
   // #ifdef MP-WEIXIN || MP-ALIPAY
   // 微信小程序不支持重试，直接进入最终状态
-  setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
+  setStatus(ItemStatus.OVER, `重试${context.retryCount}次后仍然失败`)
   await item.updateHeight()
   setTimeout(() => {
     item.loaded = true
@@ -249,7 +238,7 @@ async function handleFailureRetry() {
     await item.refreshImage(false)
   } else {
     // 重试次数用完，结束处理
-    setStatus(ItemStatus.FINAL, `重试${context.retryCount}次后仍然失败`)
+    setStatus(ItemStatus.OVER, `重试${context.retryCount}次后仍然失败`)
     await item.updateHeight()
     item.loaded = true
   }
@@ -288,7 +277,7 @@ async function loaded(event?: any) {
   item.loadSuccess = event?.type === 'load' || event?.type === 'onLoad'
 
   if (item.loadSuccess) {
-    setStatus(ItemStatus.NONE)
+    setStatus(ItemStatus.SUCCESS)
     await item.updateHeight()
     item.loaded = true
     // if (!item.height || item.heightError) {
@@ -298,8 +287,8 @@ async function loaded(event?: any) {
   }
 
   // 加载失败：根据模式处理
-  switch (context.errorMode) {
-    case 'none':
+  switch (context.errorStrategy) {
+    case 'default':
       // 默认模式：失败就结束，使用默认高度
       await handleFailureNone()
       break
@@ -313,7 +302,7 @@ async function loaded(event?: any) {
       await handleFailureRetry()
       break
 
-    case 'fallback':
+    case 'retryHard':
       // 完整模式：重试 + 占位图 + 兜底
       await handleFailureFinal()
       break
@@ -338,7 +327,7 @@ async function onPlaceholderLoad() {
  */
 async function onPlaceholderError() {
   if (overtime) return // 已超时，忽略后续加载事件
-  setStatus(ItemStatus.FINAL, '占位图片也加载失败')
+  setStatus(ItemStatus.OVER, '占位图片也加载失败')
   // 最后显示最终兜底方案结束处理
   await item.updateHeight()
   item.loaded = true
@@ -477,7 +466,16 @@ const waterfallItemStyle = computed(() => {
       :class="['wd-waterfall-item', itemId, customClass, { 'is-show': item.visible, 'is-reflowing': context.isReflowing }]"
       :style="[waterfallItemStyle, customStyle]"
     >
-      <slot :key="slotId" :loaded="loaded" :column-width="context.columnWidth" :image-height="context.columnWidth * ratio" :error-info="errorInfo" />
+      <slot
+        :key="slotId"
+        :loaded="loaded"
+        :column-width="context.columnWidth"
+        :image-height="context.columnWidth * ratio"
+        :status="errorState.status"
+        :message="errorState.message"
+        :onPlaceholderLoad="onPlaceholderLoad"
+        :onPlaceholderError="onPlaceholderError"
+      />
     </view>
     <!-- #ifdef MP-DINGTALK -->
   </view>

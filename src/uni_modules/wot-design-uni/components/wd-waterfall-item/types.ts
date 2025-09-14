@@ -4,7 +4,7 @@ import { baseProps } from '../common/props'
 /**
  * 错误状态
  */
-export type Status = 'none' | 'fail' | 'timeout' | 'final'
+export type Status = 'success' | 'fail' | 'timeout' | 'over'
 /**
  * 瀑布流项目组件属性
  */
@@ -54,28 +54,27 @@ export interface WaterfallItemSlots {
    * @param loaded 加载完成回调
    * @param columnWidth 列宽度
    * @param imageHeight 图片高度
-   * @param errorInfo 错误信息
+   * @param status 错误状态
+   * @param message 状态消息
+   * @param onPlaceholderLoad 占位符加载回调
+   * @param onPlaceholderError 占位符错误回调
    */
   default(props: {
     key: string
     loaded: (event?: any) => void
     columnWidth: number
     imageHeight: number
-    errorInfo: {
-      status: Status
-      message: string
-      placeholder: {
-        load: () => void
-        error: () => void
-      }
-    }
+    status: Status
+    message: string
+    onPlaceholderLoad: () => void
+    onPlaceholderError: () => void
   }): any
 }
 
 /**
  * 瀑布流项目组件事件
  */
-export interface WaterfallItemEmits {}
+// export interface WaterfallItemEmits {}
 
 /**
  * 瀑布流项目组件暴露的方法
