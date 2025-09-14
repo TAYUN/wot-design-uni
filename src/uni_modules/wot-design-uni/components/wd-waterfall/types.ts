@@ -166,7 +166,7 @@ export interface WaterfallContext {
   /**
    * 排版中断状态（响应式）
    */
-  isLayoutInterrupted: boolean
+  // isLayoutInterrupted: boolean
   /**
    * 错误处理模式
    */

@@ -648,7 +648,6 @@ provide(
     onItemLoad, // 项目加载完成回调
     columnWidth, // 列宽度（响应式）
     isReflowing, // 全局重排状态（响应式）
-    isLayoutInterrupted, // 排版中断状态（响应式）
     errorMode: props.errorMode, // 错误处理模式
     retryCount: props.retryCount, // 重试次数
     maxWait: props.maxWait // 最大等待时间
