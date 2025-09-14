@@ -39,12 +39,10 @@ function getErrorTypeText(status: string) {
   switch (status) {
     case 'fail':
       return '原始内容加载失败'
-    case 'final':
-      return '占位图片也加载失败'
     case 'timeout':
       return '加载超时'
-    case 'phok':
-      return '占位图片加载成功'
+    case 'over':
+      return '占位图片也加载失败'
     default:
       return ''
   }
@@ -191,30 +189,24 @@ onHide(() => {
       <wd-button size="small" @click="deleteLast">删除末项</wd-button>
     </view>
 
-    <wd-waterfall class="waterfall-container" :show="show" @load-end="loadEnd" error-mode="fallback">
+    <wd-waterfall class="waterfall-container" :show="show" @load-end="loadEnd" error-strategy="retryHard">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
-        <template #default="{ loaded, errorInfo }">
+        <template #default="{ loaded, status, onPlaceholderLoad, onPlaceholderError, message }">
           <view class="waterfall-item">
             <!-- 第一层：正常内容 -->
-            <image v-if="errorInfo.status === 'none'" mode="widthFix" :src="item.url" @load="loaded" @error="loaded" />
+            <image v-if="status === 'success'" mode="widthFix" :src="item.url" @load="loaded" @error="loaded" />
             <!-- 第二层：占位图片 -->
-            <view v-else-if="errorInfo.status === 'fail'" class="fallback-container">
-              <image
-                :src="placeholderSrc"
-                mode="aspectFill"
-                class="fallback-image"
-                @load="errorInfo.placeholder.load"
-                @error="errorInfo.placeholder.error"
-              />
+            <view v-else-if="status === 'fail'" class="fallback-container">
+              <image :src="placeholderSrc" mode="aspectFill" class="fallback-image" @load="onPlaceholderLoad" @error="onPlaceholderError" />
             </view>
             <!-- 第三层：最终兜底 -->
             <view v-else class="final-fallback">
               <view class="fallback-content">
                 <text class="fallback-text">
-                  {{ errorInfo.message || '图片加载失败' }}
+                  {{ message || '图片加载失败' }}
                 </text>
                 <text class="fallback-type">
-                  {{ getErrorTypeText(errorInfo.status) }}
+                  {{ getErrorTypeText(status) }}
                 </text>
               </view>
             </view>

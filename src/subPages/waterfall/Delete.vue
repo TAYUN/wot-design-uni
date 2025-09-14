@@ -125,12 +125,10 @@ function getErrorTypeText(status: string) {
   switch (status) {
     case 'fail':
       return '原始内容加载失败'
-    case 'final':
-      return '占位图片也加载失败'
     case 'timeout':
       return '加载超时'
-    case 'phok':
-      return '占位图片加载成功'
+    case 'over':
+      return '占位图片也加载失败'
     default:
       return ''
   }
@@ -166,31 +164,25 @@ onMounted(async () => {
     </view>
 
     <!-- 瀑布流容器 -->
-    <wd-waterfall ref="waterfallRef" :columns="2" :column-gap="10" :row-gap="10" error-mode="fallback" @load-end="loadEnd">
+    <wd-waterfall ref="waterfallRef" :columns="2" :column-gap="10" :row-gap="10" error-strategy="retryHard" @load-end="loadEnd">
       <wd-waterfall-item v-for="item in items" :key="item.id" :order="item.index">
-        <template #default="{ loaded, errorInfo }">
+        <template #default="{ loaded, status, onPlaceholderLoad, onPlaceholderError, message }">
           <view class="waterfall-item">
             <!-- 第一层：原始内容 -->
-            <MockImage v-if="errorInfo.status === 'none'" :meta="item.img" @load="loaded" />
+            <MockImage v-if="status === 'success'" :meta="item.img" @load="loaded" />
             <!-- 第二层：占位图片 -->
-            <view v-else-if="errorInfo.status === 'fail'" class="placeholder-container">
-              <image
-                :src="placeholderSrc"
-                mode="aspectFill"
-                class="placeholder-image"
-                @load="errorInfo.placeholder.load"
-                @error="errorInfo.placeholder.error"
-              />
+            <view v-else-if="status === 'fail'" class="placeholder-container">
+              <image :src="placeholderSrc" mode="aspectFill" class="placeholder-image" @load="onPlaceholderLoad" @error="onPlaceholderError" />
             </view>
 
             <!-- 第三层：最终兜底方案（占位图片失败或超时） -->
             <view v-else class="fallback-container">
               <view class="fallback-content">
                 <text class="fallback-message">
-                  {{ errorInfo.message || '图片加载失败' }}
+                  {{ message || '图片加载失败' }}
                 </text>
                 <text>
-                  {{ getErrorTypeText(errorInfo.status) }}
+                  {{ getErrorTypeText(status) }}
                 </text>
               </view>
             </view>
@@ -203,7 +195,7 @@ onMounted(async () => {
               <view class="item-info">
                 <text class="info-text">ID: {{ item.id }}</text>
                 <text class="info-text">Index: {{ item.index }}</text>
-                <text v-if="errorInfo.status !== 'none'" class="error-text">错误: {{ errorInfo.status }}</text>
+                <text v-if="status !== 'success'" class="error-text">错误: {{ status }}</text>
               </view>
               <wd-button size="small" type="error" @click="removeItem(item.index)">删除此项</wd-button>
             </view>

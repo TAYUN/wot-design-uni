@@ -50,7 +50,7 @@ onReachBottom(async () => {
       :row-gap="4"
       :retry-count="1"
       :max-wait="1000"
-      error-mode="fallback"
+      error-strategy="retryHard"
       @load-end="loadEnd"
     >
       <wd-waterfall-item v-for="(item, index) in list" :key="index" :index="index">

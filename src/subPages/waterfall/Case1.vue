@@ -177,7 +177,7 @@ function clearAll() {
       <wd-button size="small" @click="insertBatch">批量插入</wd-button>
       <wd-button size="small" @click="clearAll">清空数据</wd-button>
     </view>
-    <wd-waterfall ref="waterfallRef" custom-class="waterfall-container" error-mode="fallback">
+    <wd-waterfall ref="waterfallRef" custom-class="waterfall-container" error-strategy="retryHard">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
         <template v-slot:default="{ loaded }">
           <view class="waterfall-item">

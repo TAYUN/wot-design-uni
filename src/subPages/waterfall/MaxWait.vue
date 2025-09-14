@@ -39,11 +39,11 @@ onMounted(async () => {
   <view title="最大等待时间">
     <wd-waterfall class="waterfall-container" :max-wait="1000" @load-end="loadEnd">
       <wd-waterfall-item v-for="(item, index) in list" :key="index">
-        <template #default="{ loaded, errorInfo }">
+        <template #default="{ loaded, status }">
           <view class="waterfall-item">
-            <image v-if="errorInfo.status !== 'timeout'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
-            <view v-if="errorInfo.status === 'timeout'" class="timeout-placeholder">加载超时占位</view>
-            <view v-if="errorInfo.status === 'timeout'" class="timeout-badge">超时</view>
+            <image v-if="status === 'success'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
+            <view v-if="status === 'timeout'" class="timeout-placeholder">加载超时占位</view>
+            <view v-if="status === 'timeout'" class="timeout-badge">超时</view>
             <view class="waterfall-content">
               {{ item.title }}
             </view>

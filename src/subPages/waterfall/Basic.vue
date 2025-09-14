@@ -48,20 +48,20 @@ onReachBottom(async () => {
 
 <template>
   <view>
-    <wd-waterfall class="waterfall-container" @load-end="loadEnd" error-mode="placeholder">
+    <wd-waterfall class="waterfall-container" @load-end="loadEnd" error-strategy="placeholder">
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index">
-        <template #default="{ loaded, errorInfo }">
+        <template #default="{ loaded, status, onPlaceholderLoad, onPlaceholderError }">
           <view class="waterfall-item">
-            <image v-if="errorInfo.status === 'none'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
+            <image v-if="status === 'success'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
             <image
-              v-else-if="errorInfo.status === 'fail'"
+              v-else-if="status === 'fail'"
               mode="widthFix"
               class="waterfall-image"
               :src="placeholderSrc"
-              @load="errorInfo.placeholder.load"
-              @error="errorInfo.placeholder.error"
+              @load="onPlaceholderLoad"
+              @error="onPlaceholderError"
             />
-            <view class="item-title">{{ item.title }}{{ errorInfo.status }}</view>
+            <view class="item-title">{{ item.title }}{{ status }}</view>
           </view>
         </template>
       </wd-waterfall-item>
