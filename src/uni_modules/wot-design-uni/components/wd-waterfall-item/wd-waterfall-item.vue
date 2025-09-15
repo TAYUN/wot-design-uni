@@ -227,9 +227,7 @@ async function handleFailureRetry() {
   // 微信小程序不支持重试，直接进入最终状态
   setStatus(ItemStatus.OVER, `重试${context.retryCount}次后仍然失败`)
   await item.updateHeight()
-  setTimeout(() => {
-    item.loaded = true
-  }, 0)
+  item.loaded = true
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -253,6 +251,8 @@ async function handleFailureFinal() {
   setStatus(ItemStatus.FAIL, '原始内容加载失败')
   await item.updateHeight()
   item.loaded = true
+  console.log('handleFailureFinal', item.loaded, item)
+
   // #endif
   // #ifndef MP-WEIXIN || MP-ALIPAY
   if (retryCount > 0) {
@@ -272,10 +272,10 @@ async function handleFailureFinal() {
  * 通知父组件进行重新布局
  */
 async function loaded(event?: any) {
+  // console.log('event', event)
   if (props.width && props.height) return
   if (overtime) return // 已超时，忽略后续加载事件
   item.loadSuccess = event?.type === 'load' || event?.type === 'onLoad'
-
   if (item.loadSuccess) {
     setStatus(ItemStatus.SUCCESS)
     await item.updateHeight()
@@ -285,8 +285,7 @@ async function loaded(event?: any) {
     // }
     return
   }
-
-  // 加载失败：根据模式处理
+  // 加载失败：根据异常处理策略处理
   switch (context.errorStrategy) {
     case 'default':
       // 默认模式：失败就结束，使用默认高度
@@ -340,7 +339,9 @@ async function onPlaceholderError() {
 
 async function updateHeight(flag = false) {
   try {
+    // console.log('context.removalProcessing', context.removalProcessing)
     // if (context.isLayoutInterrupted) return
+    // console.log('触发了获取dom信息')
     await nextTick() // 很重要不然会导致获取高度错误
     // #ifdef MP-WEIXIN || MP-ALIPAY || APP-PLUS
     await new Promise((resolve) => setTimeout(resolve, 200))
@@ -354,7 +355,7 @@ async function updateHeight(flag = false) {
       item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
       // console.warn('高度异常-a heightError', item.heightError, item)
     } else {
-      // 纯图片加载加载失败，图片容器可能也是240
+      // 注意 纯图片加载加载失败，图片容器可能也是240
       item.height = rectHeight
       item.heightError = false
       // if (rectHeight === 240) {
@@ -367,7 +368,7 @@ async function updateHeight(flag = false) {
     }
   } catch (error) {
     // 查询失败时静默处理，避免报错
-    // console.error(`error高度获取失败，${item}`, error)
+    console.error('error高度获取失败', item, error)
     item.height = FALLBACK_HEIGHT // 出错了，使用默认高度
     item.heightError = true // 设置特殊高度与默认240高度区别开，避免误伤正常240的情况
     // void error
@@ -450,7 +451,6 @@ const waterfallItemStyle = computed(() => {
   return {
     width: `${context.columnWidth}px`,
     transform: `translate3d(${item.left}px,${item.top}px,0px)`,
-    // 过渡动画：根据延迟状态决定是否包含 transform 动画
     transition: laterVisible.value
       ? 'opacity var(--wd-waterfall-duration) ease-out,transform var(--wd-waterfall-duration) ease-out' // 包含位置动画，使用缓出效果
       : 'opacity var(--wd-waterfall-duration) ease-out' // 仅包含透明度动画
