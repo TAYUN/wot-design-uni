@@ -204,12 +204,13 @@ function clearAll() {
       <wd-waterfall-item v-for="(item, index) in list" :key="item.id" :order="index" :id="item.id">
         <template #default="{ loaded, status, onPlaceholderLoad, onPlaceholderError, message }">
           <view class="waterfall-item">
+            <!-- bug 这里用v-if,删除的item的时候会触发正儿for循环的模板重新渲染 -->
             <image v-if="status === 'success'" mode="widthFix" class="waterfall-image" :src="item.url" @load="loaded" @error="loaded" />
-            <!-- 第二层：占位图片 -->
+            <!--占位图片 -->
             <view v-else-if="status === 'fail'" class="fallback-container">
               <image :src="placeholderSrc" mode="aspectFill" class="fallback-image" @load="onPlaceholderLoad" @error="onPlaceholderError" />
             </view>
-            <!-- 第三层：最终兜底 -->
+            <!-- 最终兜底 -->
             <view v-else class="final-fallback">
               {{ message || '图片加载失败' }}
             </view>
