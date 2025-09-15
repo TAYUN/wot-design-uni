@@ -244,9 +244,9 @@ async function removeItem(item: WaterfallItemInfo) {
  * 批量执行删除操作并重新计算布局
  */
 function processPendingRemovals() {
-  if (pendingRemovalItems.length === 0 || removalProcessing) return
+  if (pendingRemovalItems.length === 0 || removalProcessing.value) return
 
-  removalProcessing = true
+  removalProcessing.value = true
 
   // 批量删除所有待删除项目
   pendingRemovalItems.forEach((item) => {
@@ -271,7 +271,7 @@ function recalculateItemsAfterRemoval() {
     containerHeight.value = 0
     initColumns()
     // 释放删除锁
-    removalProcessing = false
+    removalProcessing.value = false
     return
   }
 
@@ -308,7 +308,7 @@ function recalculateItemsAfterRemoval() {
   containerHeight.value = newContainerHeight
 
   // 释放删除锁
-  removalProcessing = false
+  removalProcessing.value = false
 
   // 检查是否有待处理的排版队列
   if (pendingItems.length > 0) {
@@ -405,7 +405,7 @@ let queueProcessing = false
 /**
  * 删除处理状态
  */
-let removalProcessing = false
+const removalProcessing = ref(false)
 
 /**
  * 处理排版队列
@@ -414,7 +414,7 @@ let removalProcessing = false
 
 async function processQueue() {
   try {
-    if (queueProcessing || removalProcessing) return
+    if (queueProcessing || removalProcessing.value) return
     queueProcessing = true
     updateLoadStatus()
     if (pendingItems.length === 0) return
@@ -424,6 +424,7 @@ async function processQueue() {
       const item = pendingItems[0] // 取队列第一个项目
       // 检查项目是否已加载
       if (!item.loaded) {
+        console.log('pendingItems', pendingItems)
         await waitItemLoaded(item)
       }
 
@@ -650,7 +651,8 @@ provide(
     isReflowing, // 全局重排状态（响应式）
     errorStrategy: props.errorStrategy, // 错误处理模式
     retryCount: props.retryCount, // 重试次数
-    maxWait: props.maxWait // 最大等待时间
+    maxWait: props.maxWait, // 最大等待时间
+    removalProcessing // 删除处理中状态（响应式）
   })
 )
 

@@ -179,6 +179,10 @@ export interface WaterfallContext {
    * 最大等待时间（毫秒）
    */
   maxWait: number
+  /**
+   * 是否在删除状态
+   */
+  removalProcessing: boolean
 }
 
 /**
